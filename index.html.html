@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deck 2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2d3748;
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            color: #a0aec0;
+            font-size: 14px;
+        }
+        
+        .right-panel h2 {
+            margin-bottom: 5px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .left-panel, .right-panel {
+            padding: 30px;
+        }
+        
+        .left-panel {
+            border-right: 2px solid #e2e8f0;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .field-group {
+            margin-bottom: 20px;
+        }
+        
+        .field-with-copy {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+        
+        .field-with-copy input,
+        .field-with-copy select,
+        .field-with-copy textarea {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .copy-field-btn {
+            padding: 10px 16px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background 0.3s;
+            height: 42px;
+        }
+        
+        .copy-field-btn:hover {
+            background: #38a169;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select {
+            cursor: pointer;
+            background: white;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+        
+        .time-tracker {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .time-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .time-column h3 {
+            font-size: 14px;
+            color: #2d3748;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .time-entry {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .time-entry input {
+            flex: 1;
+            margin-bottom: 0;
+            padding: 8px;
+            font-size: 13px;
+        }
+        
+        .time-entry button {
+            padding: 8px 12px;
+            background: #fc8181;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+        
+        .time-entry button:hover {
+            background: #f56565;
+        }
+        
+        button.add-time-btn {
+            width: 100%;
+            background: #4299e1;
+            padding: 8px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        button.add-time-btn:hover {
+            background: #3182ce;
+        }
+        
+        .time-totals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+        }
+        
+        .total-time {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .total-time.inbound {
+            background: #48bb78;
+        }
+        
+        .total-time.outbound {
+            background: #4299e1;
+        }
+        
+        .grand-total {
+            grid-column: 1 / -1;
+            background: #2d3748;
+            font-size: 16px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+        }
+        
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .output-area {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 500px;
+            overflow-y: auto;
+            min-height: 400px;
+        }
+        
+        .output-section {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .output-section-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .copy-section-btn {
+            background: white;
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .copy-section-btn:hover {
+            background: #f7fafc;
+            transform: scale(1.05);
+        }
+        
+        .output-section-content {
+            padding: 0;
+        }
+        
+        .editable-textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            min-height: 400px;
+            background: white;
+            color: #2d3748;
+        }
+        
+        .editable-textarea:focus {
+            outline: 2px solid #667eea;
+            outline-offset: -2px;
+        }
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .add-time-btn {
+            width: 100%;
+            background: #4299e1;
+            margin-top: 10px;
+        }
+        
+        .add-time-btn:hover {
+            background: #3182ce;
+        }
+        
+        small {
+            color: #718096;
+            font-size: 12px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            background: #667eea;
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .modal-body {
+            padding: 25px;
+            max-height: calc(80vh - 140px);
+            overflow-y: auto;
+        }
+        
+        .template-list {
+            margin-bottom: 20px;
+        }
+        
+        .template-item {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .template-item-content {
+            flex: 1;
+        }
+        
+        .template-item h3 {
+            margin: 0 0 8px 0;
+            color: #2d3748;
+            font-size: 16px;
+        }
+        
+        .template-item textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-top: 8px;
+            font-size: 12px;
+            padding: 10px;
+        }
+        
+        .template-item-actions {
+            display: flex;
+            gap: 8px;
+            flex-direction: column;
+        }
+        
+        .btn-delete {
+            background: #fc8181;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-delete:hover {
+            background: #f56565;
+        }
+        
+        .btn-save {
+            background: #48bb78;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-save:hover {
+            background: #38a169;
+        }
+        
+        .add-template-section {
+            background: #edf2f7;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .add-template-section h3 {
+            margin: 0 0 15px 0;
+            color: #2d3748;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+        }
+        
+        .stats-display {
+            background: #edf2f7;
+            border-left: 4px solid #667eea;
+            padding: 10px 12px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .stats-display strong {
+            color: #2d3748;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+        
+        .stat-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .log-call-btn {
+            width: 100%;
+            background: #48bb78;
+            margin-top: 15px;
+        }
+        
+        .log-call-btn:hover {
+            background: #38a169;
+        }
+        
+        .stats-container {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .stats-container h2 {
+            color: #2d3748;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th {
+            background: #f7fafc;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+            color: #4a5568;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .stats-table td {
+            padding: 10px;
+            font-size: 13px;
+            color: #2d3748;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .stats-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .stats-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .stats-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📞 Deck 2</h1>
+        </header>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <!-- Issue Category -->
+                <div class="section">
+                    <h2>Issue Category</h2>
+                    <div class="field-group">
+                        <label for="mainCategory">Main Category:</label>
+                        <div class="field-with-copy">
+                            <select id="mainCategory" onchange="updateSubcategoryDropdown()"></select>
+                            <button class="copy-field-btn" onclick="copyField('mainCategory')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label for="subCategory">Subcategory:</label>
+                        <div class="field-with-copy">
+                            <select id="subCategory" onchange="generateTemplate()"></select>
+                            <button class="copy-field-btn" onclick="copyField('subCategory')">Copy</button>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button onclick="openCategoryManager()" style="width: 100%; background: #805ad5;">📝 Manage Categories</button>
+                    </div>
+                </div>
+                
+                <!-- Customer Info -->
+                <div class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">Customer Information</h2>
+                        <button onclick="openCustomerFieldsManager()" style="background: #805ad5; padding: 8px 16px; font-size: 13px;">⚙️ Manage Fields</button>
+                    </div>
+                    
+                    <!-- Common fields for all categories -->
+                    <div class="field-group">
+                        <label for="firstName">First Name:</label>
+                        <div class="field-with-copy">
+                            <input type="text" id="firstName" placeholder="Enter first name" oninput="generateTemplate()">
+                            <button class="copy-field-btn" onclick="copyField('firstName')">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="lastName">Last Name:</label>
+                        <div class="field-with-copy">
+                            <input type="text" id="lastName" placeholder="Enter last name" oninput="generateTemplate()">
+                            <button class="copy-field-btn" onclick="copyField('lastName')">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="phoneNumber">Phone Number:</label>
+                        <div class="field-with-copy">
+                            <input type="text" id="phoneNumber" placeholder="Enter phone number" oninput="generateTemplate()">
+                            <button class="copy-field-btn" onclick="copyField('phoneNumber')">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="email">Email:</label>
+                        <div class="field-with-copy">
+                            <input type="text" id="email" placeholder="Enter email address" oninput="generateTemplate()">
+                            <button class="copy-field-btn" onclick="copyField('email')">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="bpn">BPN:</label>
+                        <div class="field-with-copy">
+                            <input type="text" id="bpn" placeholder="Enter BPN" oninput="generateTemplate()">
+                            <button class="copy-field-btn" onclick="copyField('bpn')">Copy</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom fields container -->
+                    <div id="customFieldsContainer"></div>
+                    
+                    <!-- Käyttötuki-specific fields -->
+                    <div id="kayttotukiFields" style="display: none;">
+                        <div class="field-group">
+                            <label for="ytunnus">Y-tunnus:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="ytunnus" placeholder="Enter Y-tunnus" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('ytunnus')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+                            <label style="color: #667eea; font-size: 15px;">Secondary Contact Person</label>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="contact2Name">Full Name:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="contact2Name" placeholder="Enter full name" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('contact2Name')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="contact2Phone">Phone:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="contact2Phone" placeholder="Enter phone number" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('contact2Phone')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="contact2Email">Email:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="contact2Email" placeholder="Enter email address" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('contact2Email')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+                            <label style="color: #667eea; font-size: 15px;">Ticket & ID Information</label>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="ticketNumber1">Ticket Number 1:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="ticketNumber1" placeholder="e.g., TK-12345" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('ticketNumber1')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="ticketNumber2">Ticket Number 2:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="ticketNumber2" placeholder="e.g., TK-67890" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('ticketNumber2')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="id1">ID 1:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="id1" placeholder="Enter ID 1" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('id1')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="id2">ID 2:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="id2" placeholder="Enter ID 2" oninput="generateTemplate()">
+                                <button class="copy-field-btn" onclick="copyField('id2')">Copy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Call Time Tracker -->
+                <div class="section">
+                    <h2>Daily Call Time Tracker</h2>
+                    <button class="log-call-btn" onclick="logCall()">✓ Log This Call</button>
+                    <div class="time-tracker" style="margin-top: 15px;">
+                        <div class="time-columns">
+                            <div class="time-column">
+                                <h3>📞 Inbound Minutes</h3>
+                                <div id="inboundEntries"></div>
+                                <button class="add-time-btn" onclick="addTimeEntry('inbound')">+ Add Inbound</button>
+                            </div>
+                            <div class="time-column">
+                                <h3>📱 Outbound Minutes</h3>
+                                <div id="outboundEntries"></div>
+                                <button class="add-time-btn" onclick="addTimeEntry('outbound')">+ Add Outbound</button>
+                            </div>
+                        </div>
+                        <div class="time-totals">
+                            <div class="total-time inbound" id="inboundTotal">Inbound: 0 min</div>
+                            <div class="total-time outbound" id="outboundTotal">Outbound: 0 min</div>
+                            <div class="total-time grand-total" id="grandTotal">Total Today: 0 minutes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Notes -->
+                <div class="section">
+                    <div class="field-group">
+                        <label for="additionalNotes">Additional Notes (Optional):</label>
+                        <div class="field-with-copy">
+                            <textarea id="additionalNotes" placeholder="Any extra details..." oninput="generateTemplate()"></textarea>
+                            <button class="copy-field-btn" onclick="copyField('additionalNotes')">Copy</button>
+                        </div>
+                    </div>
+                </div>
+                
+
+            </div>
+            
+            <div class="right-panel">
+                <div class="section">
+                    <h2>Summary</h2>
+                    <small>Complete documentation ready to copy</small>
+                    <div class="output-area" id="output">
+                        <div style="padding: 40px; text-align: center; color: #718096;">
+                            <p>Your documentation summary will appear here...</p>
+                            <p style="margin-top: 10px;">Fill in the details on the left to generate summary.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <h2>📊 Today's Call Statistics</h2>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Calls</th>
+                                <th>Inbound</th>
+                                <th>Outbound</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBodyToday">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #718096;">No categories yet. Add subcategories to start tracking.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="stats-container">
+                    <h2>📈 All-Time Call Statistics</h2>
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Calls</th>
+                                <th>Inbound</th>
+                                <th>Outbound</th>
+                                <th>Total</th>
+                                <th>Avg/Call</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statsTableBodyAllTime">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #718096;">No categories yet. Add subcategories to start tracking.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="copy-notification" id="copyNotification">
+        ✓ Copied to clipboard!
+    </div>
+    
+    <!-- Customer Fields Manager Modal -->
+    <div id="customerFieldsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Manage Customer Fields</h2>
+                <button class="close-btn" onclick="closeCustomerFieldsManager()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #edf2f7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <h3 style="margin-top: 0;">Default Fields (Cannot be removed):</h3>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #2d3748;">
+                        <li>First Name</li>
+                        <li>Last Name</li>
+                        <li>Phone Number</li>
+                        <li>Email</li>
+                        <li>BPN</li>
+                    </ul>
+                </div>
+                
+                <h3>Custom Fields:</h3>
+                <div id="customFieldsList" class="template-list"></div>
+                
+                <div class="add-template-section" style="margin-top: 20px;">
+                    <h3>➕ Add New Custom Field</h3>
+                    <div class="form-group">
+                        <label for="newFieldName">Field Name:</label>
+                        <input type="text" id="newFieldName" placeholder="e.g., Company Name, Department">
+                    </div>
+                    <button onclick="addCustomField()" style="width: 100%;">Add Custom Field</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Category Manager Modal -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Manage Categories</h2>
+                <button class="close-btn" onclick="closeCategoryManager()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="viewMainCategory">View Subcategories For:</label>
+                    <select id="viewMainCategory" onchange="renderCategoryList()" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 6px;">
+                        <option value="">-- Select Main Category --</option>
+                    </select>
+                </div>
+                
+                <div class="template-list" id="categoryList"></div>
+                
+                <div class="add-template-section" style="margin-top: 20px;">
+                    <h3>➕ Add New Subcategory</h3>
+                    <div class="form-group">
+                        <label for="newSubcategoryName">Subcategory Name:</label>
+                        <input type="text" id="newSubcategoryName" placeholder="e.g., Password Reset">
+                    </div>
+                    <div class="form-group">
+                        <label for="newSubcategoryTemplate">Template (Optional):</label>
+                        <textarea id="newSubcategoryTemplate" rows="6" placeholder="Enter template text here..."></textarea>
+                    </div>
+                    <button onclick="addNewSubcategory()" style="width: 100%;">Add Subcategory to Selected Category</button>
+                </div>
+                
+                <div class="add-template-section" style="margin-top: 20px;">
+                    <h3>➕ Add New Main Category</h3>
+                    <div class="form-group">
+                        <label for="newMainCategoryName">Main Category Name:</label>
+                        <input type="text" id="newMainCategoryName" placeholder="e.g., IT Support">
+                    </div>
+                    <button onclick="addNewMainCategory()" style="width: 100%;">Add Main Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Category structure
+        function getDefaultCategories() {
+            return {
+                'helppi': {
+                    name: 'Helppi',
+                    subcategories: {}
+                },
+                'kayttotuki': {
+                    name: 'Käyttötuki',
+                    subcategories: {}
+                },
+                'aspa': {
+                    name: 'Aspa',
+                    subcategories: {}
+                }
+            };
+        }
+        
+        let categories = {};
+        let callStats = {};
+        
+        // Initialize categories
+        function initCategories() {
+            const savedCategories = localStorage.getItem('callCategories');
+            if (savedCategories) {
+                categories = JSON.parse(savedCategories);
+            } else {
+                categories = getDefaultCategories();
+                saveCategories();
+            }
+            populateMainCategoryDropdown();
+            loadCallStats();
+        }
+        
+        function saveCategories() {
+            localStorage.setItem('callCategories', JSON.stringify(categories));
+            populateMainCategoryDropdown();
+            updateStatsDisplay();
+        }
+        
+        function populateMainCategoryDropdown() {
+            const select = document.getElementById('mainCategory');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select Main Category --</option>';
+            
+            Object.keys(categories).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = categories[key].name;
+                select.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (currentValue && categories[currentValue]) {
+                select.value = currentValue;
+                updateSubcategoryDropdown();
+            }
+        }
+        
+        function updateSubcategoryDropdown() {
+            const mainCategoryKey = document.getElementById('mainCategory').value;
+            const subSelect = document.getElementById('subCategory');
+            const currentValue = subSelect.value;
+            
+            subSelect.innerHTML = '<option value="">-- Select Subcategory --</option>';
+            
+            if (mainCategoryKey && categories[mainCategoryKey]) {
+                const subcategories = categories[mainCategoryKey].subcategories;
+                Object.keys(subcategories).forEach(key => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = subcategories[key].name;
+                    subSelect.appendChild(option);
+                });
+                
+                // Restore selection if it still exists
+                if (currentValue && subcategories[currentValue]) {
+                    subSelect.value = currentValue;
+                }
+            }
+            
+            // Show/hide Käyttötuki-specific fields
+            updateCustomerFields();
+            generateTemplate();
+        }
+        
+        function updateCustomerFields() {
+            const mainCategoryKey = document.getElementById('mainCategory').value;
+            const kayttotukiFields = document.getElementById('kayttotukiFields');
+            
+            if (mainCategoryKey === 'kayttotuki') {
+                kayttotukiFields.style.display = 'block';
+            } else {
+                kayttotukiFields.style.display = 'none';
+            }
+        }
+        
+        // Call statistics functions
+        function loadCallStats() {
+            const savedStats = localStorage.getItem('callStats');
+            if (savedStats) {
+                callStats = JSON.parse(savedStats);
+                // Reset today's stats if it's a new day
+                const today = new Date().toDateString();
+                if (callStats.lastDate !== today) {
+                    callStats.today = {};
+                    callStats.todayInbound = {};
+                    callStats.todayOutbound = {};
+                    callStats.lastDate = today;
+                    saveCallStats();
+                }
+            } else {
+                callStats = {
+                    today: {},
+                    todayInbound: {},
+                    todayOutbound: {},
+                    allTime: {},
+                    allTimeInbound: {},
+                    allTimeOutbound: {},
+                    lastDate: new Date().toDateString()
+                };
+            }
+            updateStatsDisplay();
+        }
+        let lastLoggedMainCategory = '';
+        let lastLoggedSubCategory = '';
+        let customFields = [];
+        
+        function loadCustomFields() {
+            const saved = localStorage.getItem('customFields');
+            if (saved) {
+                customFields = JSON.parse(saved);
+            }
+            renderCustomFields();
+        }
+        
+        function saveCustomFields() {
+            localStorage.setItem('customFields', JSON.stringify(customFields));
+            renderCustomFields();
+        }
+        
+        function renderCustomFields() {
+            const container = document.getElementById('customFieldsContainer');
+            container.innerHTML = '';
+            
+            customFields.forEach((field, index) => {
+                const fieldGroup = document.createElement('div');
+                fieldGroup.className = 'field-group';
+                fieldGroup.innerHTML = `
+                    <label for="customField${index}">${field.name}:</label>
+                    <div class="field-with-copy">
+                        <input type="text" id="customField${index}" placeholder="Enter ${field.name}" oninput="generateTemplate()">
+                        <button class="copy-field-btn" onclick="copyField('customField${index}')">Copy</button>
+                    </div>
+                `;
+                container.appendChild(fieldGroup);
+            });
+        }
+        
+        function renderCustomFieldsList() {
+            const listContainer = document.getElementById('customFieldsList');
+            listContainer.innerHTML = '';
+            
+            if (customFields.length === 0) {
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">No custom fields yet. Add one below!</div>';
+                return;
+            }
+            
+            customFields.forEach((field, index) => {
+                const item = document.createElement('div');
+                item.className = 'template-item';
+                item.innerHTML = `
+                    <div class="template-item-content">
+                        <h3>${field.name}</h3>
+                    </div>
+                    <div class="template-item-actions">
+                        <button class="btn-delete" onclick="deleteCustomField(${index})">🗑️ Delete</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+        
+        function addCustomField() {
+            const name = document.getElementById('newFieldName').value.trim();
+            
+            if (!name) {
+                alert('Please enter a field name!');
+                return;
+            }
+            
+            // Check if field already exists
+            if (customFields.some(f => f.name.toLowerCase() === name.toLowerCase())) {
+                alert('A field with this name already exists!');
+                return;
+            }
+            
+            customFields.push({ name: name });
+            saveCustomFields();
+            renderCustomFieldsList();
+            document.getElementById('newFieldName').value = '';
+            showNotification('Custom field added!');
+        }
+        
+        function deleteCustomField(index) {
+            if (confirm(`Are you sure you want to delete the field "${customFields[index].name}"?`)) {
+                customFields.splice(index, 1);
+                saveCustomFields();
+                renderCustomFieldsList();
+                showNotification('Custom field deleted!');
+            }
+        }
+        
+        function saveCallStats() {
+            localStorage.setItem('callStats', JSON.stringify(callStats));
+        }
+        
+        function logCall() {
+            const mainCategoryKey = document.getElementById('mainCategory').value;
+            const subCategoryKey = document.getElementById('subCategory').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const bpn = document.getElementById('bpn').value.trim();
+            
+            // Check if required fields are filled
+            if (!mainCategoryKey || !subCategoryKey) {
+                alert('Error: Please select both main category and subcategory!');
+                return;
+            }
+            
+            // Check if at least one field is filled (including custom fields)
+            let hasCustomerInfo = firstName || lastName || phoneNumber || email || bpn;
+            
+            if (!hasCustomerInfo) {
+                // Check custom fields
+                for (let i = 0; i < customFields.length; i++) {
+                    const customFieldValue = document.getElementById(`customField${i}`)?.value.trim();
+                    if (customFieldValue) {
+                        hasCustomerInfo = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!hasCustomerInfo) {
+                alert('Error: Please fill in at least one customer information field (First Name, Last Name, Phone, Email, BPN, or any custom field)!');
+                return;
+            }
+            
+            // Check if time fields have been interacted with (even if 0)
+            const timeData = updateTotalTime();
+            const inboundMinutes = timeData.inbound;
+            const outboundMinutes = timeData.outbound;
+            
+            // Check if any time input has been filled (including 0)
+            const inboundInputs = document.querySelectorAll('[id^="inboundTime"]');
+            const outboundInputs = document.querySelectorAll('[id^="outboundTime"]');
+            
+            let hasTimeInput = false;
+            inboundInputs.forEach(input => {
+                if (input.value !== '') hasTimeInput = true;
+            });
+            outboundInputs.forEach(input => {
+                if (input.value !== '') hasTimeInput = true;
+            });
+            
+            if (!hasTimeInput) {
+                alert('Error: Please enter time values (0 or more) in at least one time field before logging!');
+                return;
+            }
+            
+            // Store the logged categories for next call
+            lastLoggedMainCategory = mainCategoryKey;
+            lastLoggedSubCategory = subCategoryKey;
+            
+            const categoryKey = `${mainCategoryKey}_${subCategoryKey}`;
+            
+            // Initialize counters if they don't exist
+            if (!callStats.today[categoryKey]) callStats.today[categoryKey] = 0;
+            if (!callStats.todayInbound[categoryKey]) callStats.todayInbound[categoryKey] = 0;
+            if (!callStats.todayOutbound[categoryKey]) callStats.todayOutbound[categoryKey] = 0;
+            if (!callStats.allTime[categoryKey]) callStats.allTime[categoryKey] = 0;
+            if (!callStats.allTimeInbound[categoryKey]) callStats.allTimeInbound[categoryKey] = 0;
+            if (!callStats.allTimeOutbound[categoryKey]) callStats.allTimeOutbound[categoryKey] = 0;
+            
+            // Increment counters
+            callStats.today[categoryKey]++;
+            callStats.todayInbound[categoryKey] += inboundMinutes;
+            callStats.todayOutbound[categoryKey] += outboundMinutes;
+            callStats.allTime[categoryKey]++;
+            callStats.allTimeInbound[categoryKey] += inboundMinutes;
+            callStats.allTimeOutbound[categoryKey] += outboundMinutes;
+            
+            saveCallStats();
+            updateStatsDisplay();
+            showNotification('Call logged successfully!');
+            
+            // Clear all customer information fields
+            document.getElementById('firstName').value = '';
+            document.getElementById('lastName').value = '';
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('bpn').value = '';
+            
+            // Clear custom fields
+            customFields.forEach((field, index) => {
+                const customFieldElem = document.getElementById(`customField${index}`);
+                if (customFieldElem) customFieldElem.value = '';
+            });
+            
+            // Clear Käyttötuki-specific fields
+            document.getElementById('ytunnus').value = '';
+            document.getElementById('contact2Name').value = '';
+            document.getElementById('contact2Phone').value = '';
+            document.getElementById('contact2Email').value = '';
+            document.getElementById('ticketNumber1').value = '';
+            document.getElementById('ticketNumber2').value = '';
+            document.getElementById('id1').value = '';
+            document.getElementById('id2').value = '';
+            
+            // Clear additional notes
+            document.getElementById('additionalNotes').value = '';
+            
+            // Clear all time input fields
+            document.querySelectorAll('[id^="inboundTime"]').forEach(input => {
+                input.value = '';
+            });
+            document.querySelectorAll('[id^="outboundTime"]').forEach(input => {
+                input.value = '';
+            });
+            updateTotalTime();
+            
+            // Don't clear time entries - keep them so user can continue tracking daily time
+            
+            // Restore the categories for next call
+            document.getElementById('mainCategory').value = lastLoggedMainCategory;
+            document.getElementById('mainCategory').dispatchEvent(new Event('change'));
+            // Set subcategory after main category dropdown is populated
+            setTimeout(() => {
+                document.getElementById('subCategory').value = lastLoggedSubCategory;
+                document.getElementById('subCategory').dispatchEvent(new Event('change'));
+            }, 50);
+        }
+        
+        function updateStatsDisplay() {
+            updateStatsTable('statsTableBodyToday', true);
+            updateStatsTable('statsTableBodyAllTime', false);
+        }
+        
+        function formatTime(minutes, showHours = false) {
+            if (!showHours || minutes < 60) {
+                return `${minutes} min`;
+            }
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            if (mins === 0) {
+                return `${hours}h`;
+            }
+            return `${hours}h ${mins}min`;
+        }
+        
+        function updateStatsTable(tableBodyId, isToday) {
+            const tableBody = document.getElementById(tableBodyId);
+            tableBody.innerHTML = '';
+            
+            let hasCategories = false;
+            
+            // Iterate through main categories
+            Object.keys(categories).forEach(mainKey => {
+                const mainCategory = categories[mainKey];
+                const subcategories = mainCategory.subcategories;
+                
+                if (Object.keys(subcategories).length > 0) {
+                    hasCategories = true;
+                    
+                    // Add main category header row
+                    const headerRow = document.createElement('tr');
+                    const colspan = isToday ? '5' : '6';
+                    headerRow.innerHTML = `
+                        <td colspan="${colspan}" style="background: #edf2f7; font-weight: 600; color: #2d3748; padding: 12px 10px;">
+                            ${mainCategory.name}
+                        </td>
+                    `;
+                    tableBody.appendChild(headerRow);
+                    
+                    // Add subcategory rows
+                    Object.keys(subcategories).forEach(subKey => {
+                        const categoryKey = `${mainKey}_${subKey}`;
+                        
+                        let callCount, inboundTime, outboundTime;
+                        
+                        if (isToday) {
+                            callCount = (callStats.today && callStats.today[categoryKey]) || 0;
+                            inboundTime = (callStats.todayInbound && callStats.todayInbound[categoryKey]) || 0;
+                            outboundTime = (callStats.todayOutbound && callStats.todayOutbound[categoryKey]) || 0;
+                        } else {
+                            callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                            inboundTime = (callStats.allTimeInbound && callStats.allTimeInbound[categoryKey]) || 0;
+                            outboundTime = (callStats.allTimeOutbound && callStats.allTimeOutbound[categoryKey]) || 0;
+                        }
+                        
+                        const totalTime = inboundTime + outboundTime;
+                        const avgTime = callCount > 0 ? Math.round(totalTime / callCount) : 0;
+                        
+                        const row = document.createElement('tr');
+                        
+                        if (isToday) {
+                            row.innerHTML = `
+                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
+                                <td><span class="stats-number">${callCount}</span></td>
+                                <td><span class="stats-number">${inboundTime} min</span></td>
+                                <td><span class="stats-number">${outboundTime} min</span></td>
+                                <td><span class="stats-number">${totalTime} min</span></td>
+                            `;
+                        } else {
+                            row.innerHTML = `
+                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
+                                <td><span class="stats-number">${callCount}</span></td>
+                                <td><span class="stats-number">${formatTime(inboundTime, true)}</span></td>
+                                <td><span class="stats-number">${formatTime(outboundTime, true)}</span></td>
+                                <td><span class="stats-number">${formatTime(totalTime, true)}</span></td>
+                                <td><span class="stats-number">${formatTime(avgTime, false)}</span></td>
+                            `;
+                        }
+                        
+                        tableBody.appendChild(row);
+                    });
+                }
+            });
+            
+            if (!hasCategories) {
+                const colspan = isToday ? '5' : '6';
+                tableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: #718096;">No subcategories yet. Add subcategories to start tracking.</td></tr>`;
+            }
+        }
+        
+        function saveTemplates() {
+            localStorage.setItem('callDocTemplates', JSON.stringify(templates));
+            populateTemplateDropdown();
+            updateStatsDisplay();
+        }
+        
+        function populateTemplateDropdown() {
+            const select = document.getElementById('category');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select a Category --</option>';
+            
+            Object.keys(templates).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = templates[key].title;
+                select.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (currentValue && templates[currentValue]) {
+                select.value = currentValue;
+            }
+        }
+        
+        function openCategoryManager() {
+            populateViewMainCategoryDropdown();
+            // Auto-select the currently selected main category if any
+            const currentMainCategory = document.getElementById('mainCategory').value;
+            if (currentMainCategory) {
+                document.getElementById('viewMainCategory').value = currentMainCategory;
+            }
+            renderCategoryList();
+            document.getElementById('categoryModal').style.display = 'block';
+        }
+        
+        function closeCategoryManager() {
+            document.getElementById('categoryModal').style.display = 'none';
+            document.getElementById('newMainCategoryName').value = '';
+            document.getElementById('newSubcategoryName').value = '';
+            document.getElementById('newSubcategoryTemplate').value = '';
+        }
+        
+        function openCustomerFieldsManager() {
+            renderCustomFieldsList();
+            document.getElementById('customerFieldsModal').style.display = 'block';
+        }
+        
+        function closeCustomerFieldsManager() {
+            document.getElementById('customerFieldsModal').style.display = 'none';
+            document.getElementById('newFieldName').value = '';
+        }
+        
+        function populateViewMainCategoryDropdown() {
+            const select = document.getElementById('viewMainCategory');
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- Select Main Category --</option>';
+            
+            Object.keys(categories).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = categories[key].name;
+                select.appendChild(option);
+            });
+            
+            // Restore selection if it still exists
+            if (currentValue && categories[currentValue]) {
+                select.value = currentValue;
+            }
+        }
+        
+        function renderCategoryList() {
+            const listContainer = document.getElementById('categoryList');
+            const selectedMainKey = document.getElementById('viewMainCategory').value;
+            listContainer.innerHTML = '';
+            
+            if (!selectedMainKey) {
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">Please select a main category above to view and manage its subcategories.</div>';
+                return;
+            }
+            
+            const mainCategory = categories[selectedMainKey];
+            
+            if (!mainCategory) {
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">Selected category not found.</div>';
+                return;
+            }
+            
+            // Show main category info with delete option
+            const mainItem = document.createElement('div');
+            mainItem.className = 'template-item';
+            mainItem.style.background = '#edf2f7';
+            mainItem.innerHTML = `
+                <div class="template-item-content">
+                    <h3 style="color: #667eea;">📁 ${mainCategory.name}</h3>
+                    <small style="color: #718096;">Main Category</small>
+                </div>
+                <div class="template-item-actions">
+                    <button class="btn-delete" onclick="deleteMainCategory('${selectedMainKey}')">🗑️ Delete Category</button>
+                </div>
+            `;
+            listContainer.appendChild(mainItem);
+            
+            // Show subcategories
+            const subcategories = mainCategory.subcategories;
+            
+            if (Object.keys(subcategories).length === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.padding = '20px';
+                emptyMsg.style.textAlign = 'center';
+                emptyMsg.style.color = '#718096';
+                emptyMsg.style.marginTop = '10px';
+                emptyMsg.textContent = 'No subcategories yet. Add one below!';
+                listContainer.appendChild(emptyMsg);
+            } else {
+                Object.keys(subcategories).forEach(subKey => {
+                    const subcategory = subcategories[subKey];
+                    const subItem = document.createElement('div');
+                    subItem.className = 'template-item';
+                    subItem.style.marginTop = '10px';
+                    subItem.innerHTML = `
+                        <div class="template-item-content">
+                            <h3>${subcategory.name}</h3>
+                            <small style="color: #718096;">Subcategory</small>
+                            <textarea id="subcat-${selectedMainKey}-${subKey}" rows="4" placeholder="Template text...">${subcategory.template || ''}</textarea>
+                        </div>
+                        <div class="template-item-actions">
+                            <button class="btn-save" onclick="updateSubcategory('${selectedMainKey}', '${subKey}')">💾 Save</button>
+                            <button class="btn-delete" onclick="deleteSubcategory('${selectedMainKey}', '${subKey}')">🗑️ Delete</button>
+                        </div>
+                    `;
+                    listContainer.appendChild(subItem);
+                });
+            }
+        }
+        
+        function addNewMainCategory() {
+            const name = document.getElementById('newMainCategoryName').value.trim();
+            
+            if (!name) {
+                alert('Please enter a main category name!');
+                return;
+            }
+            
+            const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+            
+            if (categories[key]) {
+                alert('A main category with this name already exists!');
+                return;
+            }
+            
+            categories[key] = {
+                name: name,
+                subcategories: {}
+            };
+            
+            saveCategories();
+            populateViewMainCategoryDropdown();
+            showNotification('Main category added!');
+            document.getElementById('newMainCategoryName').value = '';
+            
+            // Auto-select the newly created category
+            document.getElementById('viewMainCategory').value = key;
+            renderCategoryList();
+        }
+        
+        function addNewSubcategory() {
+            const mainKey = document.getElementById('viewMainCategory').value;
+            const name = document.getElementById('newSubcategoryName').value.trim();
+            const template = document.getElementById('newSubcategoryTemplate').value.trim();
+            
+            if (!mainKey) {
+                alert('Please select a main category first from the dropdown above!');
+                return;
+            }
+            
+            if (!name) {
+                alert('Please enter a subcategory name!');
+                return;
+            }
+            
+            const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+            
+            if (categories[mainKey].subcategories[key]) {
+                alert('A subcategory with this name already exists in this main category!');
+                return;
+            }
+            
+            categories[mainKey].subcategories[key] = {
+                name: name,
+                template: template
+            };
+            
+            saveCategories();
+            renderCategoryList();
+            showNotification('Subcategory added!');
+            document.getElementById('newSubcategoryName').value = '';
+            document.getElementById('newSubcategoryTemplate').value = '';
+        }
+        
+        function updateSubcategory(mainKey, subKey) {
+            const textarea = document.getElementById(`subcat-${mainKey}-${subKey}`);
+            categories[mainKey].subcategories[subKey].template = textarea.value;
+            saveCategories();
+            showNotification('Subcategory updated!');
+        }
+        
+        function deleteSubcategory(mainKey, subKey) {
+            const subcatName = categories[mainKey].subcategories[subKey].name;
+            if (confirm(`Are you sure you want to delete "${subcatName}"?`)) {
+                delete categories[mainKey].subcategories[subKey];
+                saveCategories();
+                renderCategoryList();
+                showNotification('Subcategory deleted!');
+                generateTemplate();
+            }
+        }
+        
+        function deleteMainCategory(mainKey) {
+            const mainCatName = categories[mainKey].name;
+            const subcatCount = Object.keys(categories[mainKey].subcategories).length;
+            
+            // First confirmation
+            const firstMessage = subcatCount > 0 
+                ? `⚠️ WARNING ⚠️\n\nYou are about to delete the main category "${mainCatName}" which contains ${subcatCount} subcategory(ies).\n\nThis action will permanently delete:\n- The main category "${mainCatName}"\n- All ${subcatCount} subcategory(ies) under it\n\nAre you sure you want to continue?`
+                : `Are you sure you want to delete the main category "${mainCatName}"?`;
+            
+            if (!confirm(firstMessage)) {
+                return;
+            }
+            
+            // Second confirmation
+            const secondMessage = `⚠️ FINAL CONFIRMATION ⚠️\n\nThis is your last chance to cancel!\n\nDeleting "${mainCatName}" and all its subcategories is PERMANENT and cannot be undone.\n\nClick OK to DELETE or Cancel to keep the category.`;
+            
+            if (confirm(secondMessage)) {
+                delete categories[mainKey];
+                saveCategories();
+                populateViewMainCategoryDropdown();
+                document.getElementById('viewMainCategory').value = '';
+                renderCategoryList();
+                showNotification('Main category deleted!');
+                generateTemplate();
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('categoryModal');
+            if (event.target === modal) {
+                closeCategoryManager();
+            }
+        }
+
+        let inboundCount = 0;
+        let outboundCount = 0;
+
+        // Add initial time entries on load
+        window.onload = function() {
+            initCategories();
+            loadCustomFields();
+            addTimeEntry('inbound');
+            addTimeEntry('outbound');
+            generateTemplate(); // Initialize the summary on load
+            
+            // Restore last logged categories if they exist
+            if (lastLoggedMainCategory && categories[lastLoggedMainCategory]) {
+                document.getElementById('mainCategory').value = lastLoggedMainCategory;
+                document.getElementById('mainCategory').dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    if (lastLoggedSubCategory && categories[lastLoggedMainCategory].subcategories[lastLoggedSubCategory]) {
+                        document.getElementById('subCategory').value = lastLoggedSubCategory;
+                        document.getElementById('subCategory').dispatchEvent(new Event('change'));
+                    }
+                }, 50);
+            }
+        };
+
+        function addTimeEntry(type) {
+            if (type === 'inbound') {
+                inboundCount++;
+                const container = document.getElementById('inboundEntries');
+                const entry = document.createElement('div');
+                entry.className = 'time-entry';
+                entry.id = `inbound${inboundCount}`;
+                entry.innerHTML = `
+                    <input type="number" 
+                           id="inboundTime${inboundCount}" 
+                           placeholder="Min" 
+                           min="0" 
+                           onchange="updateTotalTime(); generateTemplate();">
+                    <button onclick="removeTimeEntry('inbound', ${inboundCount})">×</button>
+                `;
+                container.appendChild(entry);
+            } else {
+                outboundCount++;
+                const container = document.getElementById('outboundEntries');
+                const entry = document.createElement('div');
+                entry.className = 'time-entry';
+                entry.id = `outbound${outboundCount}`;
+                entry.innerHTML = `
+                    <input type="number" 
+                           id="outboundTime${outboundCount}" 
+                           placeholder="Min" 
+                           min="0" 
+                           onchange="updateTotalTime(); generateTemplate();">
+                    <button onclick="removeTimeEntry('outbound', ${outboundCount})">×</button>
+                `;
+                container.appendChild(entry);
+            }
+        }
+
+        function removeTimeEntry(type, id) {
+            const entry = document.getElementById(`${type}${id}`);
+            if (entry) {
+                entry.remove();
+                updateTotalTime();
+                generateTemplate();
+            }
+        }
+
+        function updateTotalTime() {
+            let inboundTotal = 0;
+            let outboundTotal = 0;
+            
+            // Calculate inbound total from current input fields
+            const inboundInputs = document.querySelectorAll('[id^="inboundTime"]');
+            inboundInputs.forEach(input => {
+                const value = parseInt(input.value) || 0;
+                inboundTotal += value;
+            });
+            
+            // Calculate outbound total from current input fields
+            const outboundInputs = document.querySelectorAll('[id^="outboundTime"]');
+            outboundInputs.forEach(input => {
+                const value = parseInt(input.value) || 0;
+                outboundTotal += value;
+            });
+            
+            const grandTotal = inboundTotal + outboundTotal;
+            
+            // Update current input totals (for the summary and current logging)
+            document.getElementById('inboundTotal').textContent = `Inbound: ${inboundTotal} min`;
+            document.getElementById('outboundTotal').textContent = `Outbound: ${outboundTotal} min`;
+            
+            // Calculate total from logged calls for "Total Today"
+            let totalLoggedInbound = 0;
+            let totalLoggedOutbound = 0;
+            
+            if (callStats.todayInbound) {
+                Object.values(callStats.todayInbound).forEach(val => {
+                    totalLoggedInbound += val;
+                });
+            }
+            
+            if (callStats.todayOutbound) {
+                Object.values(callStats.todayOutbound).forEach(val => {
+                    totalLoggedOutbound += val;
+                });
+            }
+            
+            const totalLoggedTime = totalLoggedInbound + totalLoggedOutbound;
+            document.getElementById('grandTotal').textContent = `Total Today: ${totalLoggedTime} minutes`;
+            
+            return { inbound: inboundTotal, outbound: outboundTotal, total: grandTotal };
+        }
+
+        function copyField(fieldId) {
+            const field = document.getElementById(fieldId);
+            let value = '';
+            
+            if (field.tagName === 'SELECT') {
+                const selectedOption = field.options[field.selectedIndex];
+                value = selectedOption ? selectedOption.text : '';
+            } else {
+                value = field.value;
+            }
+            
+            if (!value || value.startsWith('--')) {
+                showNotification('Field is empty!');
+                return;
+            }
+            
+            navigator.clipboard.writeText(value).then(() => {
+                showNotification('Copied to clipboard!');
+            }).catch(err => {
+                // Fallback
+                const tempInput = document.createElement('textarea');
+                tempInput.value = value;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showNotification('Copied to clipboard!');
+            });
+        }
+
+        function generateTemplate() {
+            console.log('generateTemplate called'); // Debug log
+            const mainCategoryKey = document.getElementById('mainCategory').value;
+            const subCategoryKey = document.getElementById('subCategory').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const email = document.getElementById('email').value;
+            const bpn = document.getElementById('bpn').value;
+            const additionalNotes = document.getElementById('additionalNotes').value;
+            const timeData = updateTotalTime();
+
+            // Käyttötuki-specific fields
+            const ytunnus = document.getElementById('ytunnus').value;
+            const contact2Name = document.getElementById('contact2Name').value;
+            const contact2Phone = document.getElementById('contact2Phone').value;
+            const contact2Email = document.getElementById('contact2Email').value;
+            const ticketNumber1 = document.getElementById('ticketNumber1').value;
+            const ticketNumber2 = document.getElementById('ticketNumber2').value;
+            const id1 = document.getElementById('id1').value;
+            const id2 = document.getElementById('id2').value;
+
+            const outputDiv = document.getElementById('output');
+            
+            if (!mainCategoryKey && !subCategoryKey && !firstName && !lastName && !phoneNumber && !email && !bpn) {
+                outputDiv.innerHTML = `
+                    <div style="padding: 40px; text-align: center; color: #718096;">
+                        <p>Your documentation summary will appear here...</p>
+                        <p style="margin-top: 10px;">Fill in the details on the left to generate summary.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let template = null;
+            if (mainCategoryKey && subCategoryKey && categories[mainCategoryKey] && 
+                categories[mainCategoryKey].subcategories[subCategoryKey]) {
+                template = categories[mainCategoryKey].subcategories[subCategoryKey].template;
+            }
+            
+            // Build summary - simple format with only user data
+            let summary = `Summary:\n`;
+            
+            if (firstName || lastName) summary += `${firstName} ${lastName}`.trim() + '\n';
+            if (phoneNumber) summary += `${phoneNumber}\n`;
+            if (email) summary += `${email}\n`;
+            if (bpn) summary += `${bpn}\n`;
+            
+            // Custom fields
+            customFields.forEach((field, index) => {
+                const customFieldValue = document.getElementById(`customField${index}`)?.value.trim();
+                if (customFieldValue) {
+                    summary += `${customFieldValue}\n`;
+                }
+            });
+            
+            // Käyttötuki-specific information
+            if (mainCategoryKey === 'kayttotuki') {
+                if (ytunnus) summary += `${ytunnus}\n`;
+                
+                if (contact2Name) summary += `${contact2Name}\n`;
+                if (contact2Phone) summary += `${contact2Phone}\n`;
+                if (contact2Email) summary += `${contact2Email}\n`;
+                
+                if (ticketNumber1) summary += `${ticketNumber1}\n`;
+                if (ticketNumber2) summary += `${ticketNumber2}\n`;
+                if (id1) summary += `${id1}\n`;
+                if (id2) summary += `${id2}\n`;
+            }
+            
+            if (mainCategoryKey && subCategoryKey) {
+                const mainCategoryText = document.getElementById('mainCategory').options[document.getElementById('mainCategory').selectedIndex].text;
+                const subCategoryText = document.getElementById('subCategory').options[document.getElementById('subCategory').selectedIndex].text;
+                summary += `${mainCategoryText} - ${subCategoryText}\n`;
+            }
+            
+            if (timeData.inbound > 0) summary += `Inbound: ${timeData.inbound} min\n`;
+            if (timeData.outbound > 0) summary += `Outbound: ${timeData.outbound} min\n`;
+            
+            if (template) {
+                summary += `${template}\n`;
+            }
+            
+            if (additionalNotes) {
+                summary += `${additionalNotes}\n`;
+            }
+
+            createSection(outputDiv, 'Complete Summary', summary, 'summary');
+        }
+
+        function createSection(container, title, content, id) {
+            const section = document.createElement('div');
+            section.className = 'output-section';
+            
+            const header = document.createElement('div');
+            header.className = 'output-section-header';
+            header.innerHTML = `
+                <span>${title}</span>
+                <button class="copy-section-btn" onclick="copySectionToClipboard('${id}')">📋 Copy</button>
+            `;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'output-section-content';
+            
+            const textarea = document.createElement('textarea');
+            textarea.className = 'editable-textarea';
+            textarea.id = `section-${id}`;
+            textarea.value = content;
+            
+            contentDiv.appendChild(textarea);
+            section.appendChild(header);
+            section.appendChild(contentDiv);
+            container.innerHTML = '';
+            container.appendChild(section);
+        }
+
+        function copySectionToClipboard(sectionId) {
+            const textarea = document.getElementById(`section-${sectionId}`);
+            if (!textarea) {
+                showNotification('Section not found!');
+                return;
+            }
+
+            const text = textarea.value;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Summary copied to clipboard!');
+            }).catch(err => {
+                // Fallback method
+                textarea.select();
+                document.execCommand('copy');
+                showNotification('Summary copied to clipboard!');
+            });
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('copyNotification');
+            notification.textContent = `✓ ${message}`;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+        }
+
+        // Update summary on any field change
+        document.getElementById('mainCategory').addEventListener('change', updateSubcategoryDropdown);
+        document.getElementById('subCategory').addEventListener('change', generateTemplate);
+        document.getElementById('firstName').addEventListener('input', generateTemplate);
+        document.getElementById('lastName').addEventListener('input', generateTemplate);
+        document.getElementById('phoneNumber').addEventListener('input', generateTemplate);
+        document.getElementById('email').addEventListener('input', generateTemplate);
+        document.getElementById('bpn').addEventListener('input', generateTemplate);
+        document.getElementById('ytunnus').addEventListener('input', generateTemplate);
+        document.getElementById('contact2Name').addEventListener('input', generateTemplate);
+        document.getElementById('contact2Phone').addEventListener('input', generateTemplate);
+        document.getElementById('contact2Email').addEventListener('input', generateTemplate);
+        document.getElementById('ticketNumber1').addEventListener('input', generateTemplate);
+        document.getElementById('ticketNumber2').addEventListener('input', generateTemplate);
+        document.getElementById('id1').addEventListener('input', generateTemplate);
+        document.getElementById('id2').addEventListener('input', generateTemplate);
+        document.getElementById('additionalNotes').addEventListener('input', generateTemplate);
+    </script>
+</body>
+</html>
