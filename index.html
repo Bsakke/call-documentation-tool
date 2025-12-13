@@ -11,37 +11,95 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --bg-gradient-1: #667eea;
+            --bg-gradient-2: #764ba2;
+            --container-bg: white;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --section-bg: #f7fafc;
+            --header-bg: #667eea;
+            --header-text: white;
+            --input-bg: white;
+            --button-bg: #667eea;
+            --button-hover: #5568d3;
+            --total-today-bg: #f59e0b;
+            --total-today-text: white;
+        }
+        
+        body.dark-mode {
+            --bg-gradient-1: #1a202c;
+            --bg-gradient-2: #2d3748;
+            --container-bg: #2d3748;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0aec0;
+            --border-color: #4a5568;
+            --section-bg: #1a202c;
+            --header-bg: #1a202c;
+            --header-text: #e2e8f0;
+            --input-bg: #4a5568;
+            --button-bg: #667eea;
+            --button-hover: #5568d3;
+            --total-today-bg: #f59e0b;
+            --total-today-text: #1a202c;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
             padding: 20px;
             min-height: 100vh;
+            transition: background 0.3s ease;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: var(--container-bg);
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             overflow: hidden;
+            transition: background 0.3s ease;
         }
         
         header {
-            background: #2d3748;
-            color: white;
+            background: var(--header-bg);
+            color: var(--header-text);
             padding: 25px 30px;
             text-align: center;
+            position: relative;
+            transition: background 0.3s ease, color 0.3s ease;
         }
         
         header h1 {
             font-size: 28px;
             margin-bottom: 5px;
+            color: var(--header-text);
         }
         
         header p {
-            color: #a0aec0;
+            color: var(--text-secondary);
             font-size: 14px;
+        }
+        
+        .dark-mode-toggle {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+        
+        .dark-mode-toggle:hover {
+            background: var(--button-hover);
         }
         
         .right-panel h2 {
@@ -60,7 +118,14 @@
         }
         
         .left-panel {
-            border-right: 2px solid #e2e8f0;
+            border-right: 2px solid var(--border-color);
+            transition: border-color 0.3s ease;
+        }
+        
+        .left-panel, .right-panel {
+            padding: 30px;
+            background: var(--section-bg);
+            transition: background 0.3s ease;
         }
         
         .section {
@@ -68,19 +133,21 @@
         }
         
         .section h2 {
-            color: #2d3748;
+            color: var(--text-primary);
             font-size: 18px;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid var(--button-bg);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
         
         label {
             display: block;
-            color: #4a5568;
+            color: var(--text-primary);
             font-weight: 600;
             margin-bottom: 8px;
             font-size: 14px;
+            transition: color 0.3s ease;
         }
         
         .field-group {
@@ -110,12 +177,16 @@
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
-            transition: background 0.3s;
+            transition: background 0.3s, opacity 0.3s;
             height: 42px;
         }
         
         .copy-field-btn:hover {
             background: #38a169;
+        }
+        
+        body.dark-mode .copy-field-btn {
+            opacity: 0.95;
         }
         
         input[type="text"],
@@ -124,23 +195,25 @@
         textarea {
             width: 100%;
             padding: 10px 12px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 14px;
             font-family: inherit;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, background 0.3s, color 0.3s;
+            background: var(--input-bg);
+            color: var(--text-primary);
         }
         
         input:focus,
         select:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--button-bg);
         }
         
         select {
             cursor: pointer;
-            background: white;
+            background: var(--input-bg);
         }
         
         textarea {
@@ -150,9 +223,11 @@
         }
         
         .time-tracker {
-            background: #f7fafc;
+            background: var(--section-bg);
             padding: 15px;
             border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         
         .time-columns {
@@ -164,9 +239,10 @@
         
         .time-column h3 {
             font-size: 14px;
-            color: #2d3748;
+            color: var(--text-primary);
             margin-bottom: 10px;
             text-align: center;
+            transition: color 0.3s ease;
         }
         
         .time-entry {
@@ -177,37 +253,56 @@
         }
         
         .time-entry input {
-            flex: 1;
+            width: 100%;
             margin-bottom: 0;
             padding: 8px;
             font-size: 13px;
         }
         
-        .time-entry button {
+        .quick-minutes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .quick-min-btn {
             padding: 8px 12px;
-            background: #fc8181;
+            background: #805ad5;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             transition: background 0.3s;
+            flex: 1;
+            min-width: 45px;
         }
         
-        .time-entry button:hover {
-            background: #f56565;
+        .quick-min-btn:hover {
+            background: #6b46c1;
+        }
+        
+        body.dark-mode .quick-min-btn {
+            opacity: 0.95;
         }
         
         button.add-time-btn {
             width: 100%;
-            background: #4299e1;
+            background: var(--button-bg);
             padding: 8px;
             font-size: 12px;
             margin-bottom: 10px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
         }
         
         button.add-time-btn:hover {
-            background: #3182ce;
+            background: var(--button-hover-bg);
         }
         
         .time-totals {
@@ -216,17 +311,19 @@
             gap: 10px;
             margin-top: 15px;
             padding-top: 15px;
-            border-top: 2px solid #e2e8f0;
+            border-top: 2px solid var(--border-color);
+            transition: border-color 0.3s ease;
         }
         
         .total-time {
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             padding: 10px;
             border-radius: 6px;
             text-align: center;
             font-weight: bold;
             font-size: 14px;
+            transition: background 0.3s ease;
         }
         
         .total-time.inbound {
@@ -239,13 +336,21 @@
         
         .grand-total {
             grid-column: 1 / -1;
-            background: #2d3748;
-            font-size: 16px;
+            background: var(--total-today-bg);
+            color: var(--total-today-text);
+            font-size: 20px;
+            font-weight: 700;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            text-align: center;
+            letter-spacing: 0.5px;
         }
         
         button {
             padding: 12px 24px;
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             border: none;
             border-radius: 6px;
@@ -256,7 +361,7 @@
         }
         
         button:hover {
-            background: #5a67d8;
+            background: var(--button-hover-bg);
         }
         
         .btn-secondary {
@@ -274,24 +379,26 @@
         }
         
         .output-area {
-            background: #f7fafc;
+            background: var(--section-bg);
             padding: 20px;
             border-radius: 8px;
             max-height: 500px;
             overflow-y: auto;
             min-height: 400px;
+            transition: background 0.3s ease;
         }
         
         .output-section {
-            background: white;
-            border: 2px solid #e2e8f0;
+            background: var(--container-bg);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 15px;
             overflow: hidden;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         
         .output-section-header {
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             padding: 12px 15px;
             display: flex;
@@ -299,11 +406,12 @@
             align-items: center;
             font-weight: 600;
             font-size: 14px;
+            transition: background 0.3s ease;
         }
         
         .copy-section-btn {
             background: white;
-            color: #667eea;
+            color: var(--button-bg);
             padding: 6px 12px;
             border-radius: 4px;
             font-size: 12px;
@@ -314,7 +422,7 @@
         }
         
         .copy-section-btn:hover {
-            background: #f7fafc;
+            background: var(--section-bg);
             transform: scale(1.05);
         }
         
@@ -331,12 +439,13 @@
             line-height: 1.6;
             resize: vertical;
             min-height: 400px;
-            background: white;
-            color: #2d3748;
+            background: var(--container-bg);
+            color: var(--text-primary);
+            transition: background 0.3s ease, color 0.3s ease;
         }
         
         .editable-textarea:focus {
-            outline: 2px solid #667eea;
+            outline: 2px solid var(--button-bg);
             outline-offset: -2px;
         }
         
@@ -375,8 +484,9 @@
         }
         
         small {
-            color: #718096;
+            color: var(--text-secondary);
             font-size: 12px;
+            transition: color 0.3s ease;
         }
         
         /* Modal Styles */
@@ -392,13 +502,17 @@
             animation: fadeIn 0.3s;
         }
         
+        body.dark-mode .modal {
+            background-color: rgba(0,0,0,0.7);
+        }
+        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
         
         .modal-content {
-            background-color: white;
+            background-color: var(--container-bg);
             margin: 5% auto;
             padding: 0;
             border-radius: 12px;
@@ -408,6 +522,7 @@
             overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             animation: slideDown 0.3s;
+            transition: background 0.3s ease;
         }
         
         @keyframes slideDown {
@@ -416,12 +531,13 @@
         }
         
         .modal-header {
-            background: #667eea;
+            background: var(--button-bg);
             color: white;
             padding: 20px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background 0.3s ease;
         }
         
         .modal-header h2 {
@@ -452,6 +568,8 @@
             padding: 25px;
             max-height: calc(80vh - 140px);
             overflow-y: auto;
+            background: var(--container-bg);
+            transition: background 0.3s ease;
         }
         
         .template-list {
@@ -459,8 +577,8 @@
         }
         
         .template-item {
-            background: #f7fafc;
-            border: 2px solid #e2e8f0;
+            background: var(--section-bg);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 10px;
@@ -468,6 +586,7 @@
             justify-content: space-between;
             align-items: flex-start;
             gap: 15px;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         
         .template-item-content {
@@ -476,8 +595,9 @@
         
         .template-item h3 {
             margin: 0 0 8px 0;
-            color: #2d3748;
+            color: var(--text-primary);
             font-size: 16px;
+            transition: color 0.3s ease;
         }
         
         .template-item textarea {
@@ -515,17 +635,19 @@
         }
         
         .add-template-section {
-            background: #edf2f7;
-            border: 2px dashed #cbd5e0;
+            background: var(--section-bg);
+            border: 2px dashed var(--border-color);
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         
         .add-template-section h3 {
             margin: 0 0 15px 0;
-            color: #2d3748;
+            color: var(--text-primary);
             font-size: 18px;
+            transition: color 0.3s ease;
         }
         
         .form-group {
@@ -536,8 +658,9 @@
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
-            color: #4a5568;
+            color: var(--text-secondary);
             font-size: 14px;
+            transition: color 0.3s ease;
         }
         
         .form-group input[type="text"],
@@ -546,17 +669,19 @@
         }
         
         .stats-display {
-            background: #edf2f7;
-            border-left: 4px solid #667eea;
+            background: var(--section-bg);
+            border-left: 4px solid var(--button-bg);
             padding: 10px 12px;
             margin-top: 10px;
             border-radius: 4px;
             font-size: 12px;
-            color: #4a5568;
+            color: var(--text-secondary);
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
         
         .stats-display strong {
-            color: #2d3748;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
         
         .stat-row {
@@ -580,19 +705,21 @@
         }
         
         .stats-container {
-            background: white;
-            border: 2px solid #e2e8f0;
+            background: var(--container-bg);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         
         .stats-container h2 {
-            color: #2d3748;
+            color: var(--text-primary);
             font-size: 18px;
             margin-bottom: 15px;
             padding-bottom: 8px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid var(--button-bg);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
         
         .stats-table {
@@ -601,20 +728,22 @@
         }
         
         .stats-table th {
-            background: #f7fafc;
+            background: var(--section-bg);
             padding: 10px;
             text-align: left;
             font-size: 13px;
-            color: #4a5568;
+            color: var(--text-secondary);
             font-weight: 600;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 2px solid var(--border-color);
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
         
         .stats-table td {
             padding: 10px;
             font-size: 13px;
-            color: #2d3748;
-            border-bottom: 1px solid #e2e8f0;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
         
         .stats-table tr:last-child td {
@@ -622,12 +751,14 @@
         }
         
         .stats-table tr:hover {
-            background: #f7fafc;
+            background: var(--section-bg);
+            transition: background 0.3s ease;
         }
         
         .stats-number {
             font-weight: 600;
-            color: #667eea;
+            color: var(--button-bg);
+            transition: color 0.3s ease;
         }
     </style>
 </head>
@@ -635,6 +766,7 @@
     <div class="container">
         <header>
             <h1>📞 Deck 2</h1>
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         </header>
         
         <div class="main-content">
@@ -657,7 +789,7 @@
                         </div>
                     </div>
                     <div class="button-group">
-                        <button onclick="openCategoryManager()" style="width: 100%; background: #805ad5;">📝 Manage Categories</button>
+                        <button onclick="openCategoryManager()" style="width: 100%; background: #805ad5; color: white;">📝 Manage Categories</button>
                     </div>
                 </div>
                 
@@ -665,7 +797,7 @@
                 <div class="section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h2 style="margin: 0;">Customer Information</h2>
-                        <button onclick="openCustomerFieldsManager()" style="background: #805ad5; padding: 8px 16px; font-size: 13px;">⚙️ Manage Fields</button>
+                        <button onclick="openCustomerFieldsManager()" style="background: #805ad5; color: white; padding: 8px 16px; font-size: 13px;">⚙️ Manage Fields</button>
                     </div>
                     
                     <!-- Common fields for all categories -->
@@ -722,8 +854,8 @@
                             </div>
                         </div>
                         
-                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
-                            <label style="color: #667eea; font-size: 15px;">Secondary Contact Person</label>
+                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border-color);">
+                            <label style="color: var(--button-bg); font-size: 15px;">Secondary Contact Person</label>
                         </div>
                         
                         <div class="field-group">
@@ -750,8 +882,8 @@
                             </div>
                         </div>
                         
-                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
-                            <label style="color: #667eea; font-size: 15px;">Ticket & ID Information</label>
+                        <div class="field-group" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border-color);">
+                            <label style="color: var(--button-bg); font-size: 15px;">Ticket & ID Information</label>
                         </div>
                         
                         <div class="field-group">
@@ -791,18 +923,29 @@
                 <!-- Call Time Tracker -->
                 <div class="section">
                     <h2>Daily Call Time Tracker</h2>
-                    <button class="log-call-btn" onclick="logCall()">✓ Log This Call</button>
                     <div class="time-tracker" style="margin-top: 15px;">
                         <div class="time-columns">
                             <div class="time-column">
                                 <h3>📞 Inbound Minutes</h3>
+                                <div class="quick-minutes">
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 1)">1</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 2)">2</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 3)">3</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 4)">4</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 5)">5</button>
+                                </div>
                                 <div id="inboundEntries"></div>
-                                <button class="add-time-btn" onclick="addTimeEntry('inbound')">+ Add Inbound</button>
                             </div>
                             <div class="time-column">
                                 <h3>📱 Outbound Minutes</h3>
+                                <div class="quick-minutes">
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 1)">1</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 2)">2</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 3)">3</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 4)">4</button>
+                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 5)">5</button>
+                                </div>
                                 <div id="outboundEntries"></div>
-                                <button class="add-time-btn" onclick="addTimeEntry('outbound')">+ Add Outbound</button>
                             </div>
                         </div>
                         <div class="time-totals">
@@ -811,6 +954,7 @@
                             <div class="total-time grand-total" id="grandTotal">Total Today: 0 minutes</div>
                         </div>
                     </div>
+                    <button class="log-call-btn" onclick="logCall()" style="margin-top: 15px;">✓ Log This Call</button>
                 </div>
                 
                 <!-- Additional Notes -->
@@ -832,7 +976,7 @@
                     <h2>Summary</h2>
                     <small>Complete documentation ready to copy</small>
                     <div class="output-area" id="output">
-                        <div style="padding: 40px; text-align: center; color: #718096;">
+                        <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
                             <p>Your documentation summary will appear here...</p>
                             <p style="margin-top: 10px;">Fill in the details on the left to generate summary.</p>
                         </div>
@@ -840,7 +984,10 @@
                 </div>
                 
                 <div class="stats-container">
-                    <h2>📊 Today's Call Statistics</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">📊 Today's Call Statistics</h2>
+                        <button onclick="exportStats('today')" style="background: #48bb78; padding: 6px 12px; font-size: 12px;">📥 Export</button>
+                    </div>
                     <table class="stats-table">
                         <thead>
                             <tr>
@@ -849,18 +996,22 @@
                                 <th>Inbound</th>
                                 <th>Outbound</th>
                                 <th>Total</th>
+                                <th>%</th>
                             </tr>
                         </thead>
                         <tbody id="statsTableBodyToday">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #718096;">No categories yet. Add subcategories to start tracking.</td>
+                                <td colspan="6" style="text-align: center; color: var(--text-secondary);">No categories yet. Add subcategories to start tracking.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 
                 <div class="stats-container">
-                    <h2>📈 All-Time Call Statistics</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2 style="margin: 0;">📈 All-Time Call Statistics</h2>
+                        <button onclick="exportStats('alltime')" style="background: #48bb78; padding: 6px 12px; font-size: 12px;">📥 Export</button>
+                    </div>
                     <table class="stats-table">
                         <thead>
                             <tr>
@@ -870,11 +1021,12 @@
                                 <th>Outbound</th>
                                 <th>Total</th>
                                 <th>Avg/Call</th>
+                                <th>%</th>
                             </tr>
                         </thead>
                         <tbody id="statsTableBodyAllTime">
                             <tr>
-                                <td colspan="6" style="text-align: center; color: #718096;">No categories yet. Add subcategories to start tracking.</td>
+                                <td colspan="7" style="text-align: center; color: var(--text-secondary);">No categories yet. Add subcategories to start tracking.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -895,9 +1047,9 @@
                 <button class="close-btn" onclick="closeCustomerFieldsManager()">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="background: #edf2f7; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <div style="background: var(--section-bg); padding: 15px; border-radius: 6px; margin-bottom: 20px; border: 1px solid var(--border-color);">
                     <h3 style="margin-top: 0;">Default Fields (Cannot be removed):</h3>
-                    <ul style="margin: 10px 0; padding-left: 20px; color: #2d3748;">
+                    <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-primary);">
                         <li>First Name</li>
                         <li>Last Name</li>
                         <li>Phone Number</li>
@@ -931,7 +1083,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="viewMainCategory">View Subcategories For:</label>
-                    <select id="viewMainCategory" onchange="renderCategoryList()" style="width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 6px;">
+                    <select id="viewMainCategory" onchange="renderCategoryList()" style="width: 100%; padding: 10px; border: 2px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-primary);">
                         <option value="">-- Select Main Category --</option>
                     </select>
                 </div>
@@ -1072,9 +1224,13 @@
                     callStats.today = {};
                     callStats.todayInbound = {};
                     callStats.todayOutbound = {};
+                    callStats.todayTimestamps = [];
                     callStats.lastDate = today;
                     saveCallStats();
                 }
+                // Initialize timestamps arrays if they don't exist
+                if (!callStats.todayTimestamps) callStats.todayTimestamps = [];
+                if (!callStats.allTimeTimestamps) callStats.allTimeTimestamps = [];
             } else {
                 callStats = {
                     today: {},
@@ -1083,6 +1239,8 @@
                     allTime: {},
                     allTimeInbound: {},
                     allTimeOutbound: {},
+                    todayTimestamps: [],
+                    allTimeTimestamps: [],
                     lastDate: new Date().toDateString()
                 };
             }
@@ -1091,6 +1249,44 @@
         let lastLoggedMainCategory = '';
         let lastLoggedSubCategory = '';
         let customFields = [];
+        
+        // Dark mode management
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            
+            const btn = document.querySelector('.dark-mode-toggle');
+            btn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+        
+        function loadDarkModePreference() {
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                const btn = document.querySelector('.dark-mode-toggle');
+                if (btn) btn.textContent = '☀️ Light Mode';
+            }
+        }
+        
+        // Quick minutes function
+        function addQuickMinutes(type, minutes) {
+            const count = type === 'inbound' ? inboundCount : outboundCount;
+            if (count === 0) {
+                // No entries yet, create one first
+                addTimeEntry(type);
+            }
+            
+            // Add to the latest entry
+            const latestCount = type === 'inbound' ? inboundCount : outboundCount;
+            const inputField = document.getElementById(`${type}Time${latestCount}`);
+            if (inputField) {
+                const currentValue = parseInt(inputField.value) || 0;
+                inputField.value = currentValue + minutes;
+                updateTotalTime();
+                generateTemplate();
+            }
+        }
         
         function loadCustomFields() {
             const saved = localStorage.getItem('customFields');
@@ -1128,7 +1324,7 @@
             listContainer.innerHTML = '';
             
             if (customFields.length === 0) {
-                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #718096;">No custom fields yet. Add one below!</div>';
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No custom fields yet. Add one below!</div>';
                 return;
             }
             
@@ -1259,6 +1455,13 @@
             callStats.allTimeInbound[categoryKey] += inboundMinutes;
             callStats.allTimeOutbound[categoryKey] += outboundMinutes;
             
+            // Track timestamps
+            const currentTimestamp = new Date().toISOString();
+            if (!callStats.todayTimestamps) callStats.todayTimestamps = [];
+            if (!callStats.allTimeTimestamps) callStats.allTimeTimestamps = [];
+            callStats.todayTimestamps.push(currentTimestamp);
+            callStats.allTimeTimestamps.push(currentTimestamp);
+            
             saveCallStats();
             updateStatsDisplay();
             showNotification('Call logged successfully!');
@@ -1332,6 +1535,28 @@
             tableBody.innerHTML = '';
             
             let hasCategories = false;
+            let totalCalls = 0;
+            const mainCategoryCalls = {};
+            
+            // First pass: calculate total calls and calls per main category
+            Object.keys(categories).forEach(mainKey => {
+                const mainCategory = categories[mainKey];
+                const subcategories = mainCategory.subcategories;
+                mainCategoryCalls[mainKey] = 0;
+                
+                Object.keys(subcategories).forEach(subKey => {
+                    const categoryKey = `${mainKey}_${subKey}`;
+                    let callCount;
+                    
+                    if (isToday) {
+                        callCount = (callStats.today && callStats.today[categoryKey]) || 0;
+                    } else {
+                        callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                    }
+                    totalCalls += callCount;
+                    mainCategoryCalls[mainKey] += callCount;
+                });
+            });
             
             // Iterate through main categories
             Object.keys(categories).forEach(mainKey => {
@@ -1341,14 +1566,29 @@
                 if (Object.keys(subcategories).length > 0) {
                     hasCategories = true;
                     
-                    // Add main category header row
+                    // Calculate percentage for main category
+                    const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
+                    
+                    // Add main category header row with percentage
                     const headerRow = document.createElement('tr');
-                    const colspan = isToday ? '5' : '6';
                     headerRow.innerHTML = `
-                        <td colspan="${colspan}" style="background: #edf2f7; font-weight: 600; color: #2d3748; padding: 12px 10px;">
+                        <td colspan="5" style="background: var(--section-bg); font-weight: 600; color: var(--text-primary); padding: 12px 10px;">
                             ${mainCategory.name}
                         </td>
+                        <td style="background: var(--section-bg); font-weight: 600; padding: 12px 10px; text-align: center;">
+                            <span class="stats-number">${mainCategoryPercentage}%</span>
+                        </td>
                     `;
+                    if (!isToday) {
+                        headerRow.innerHTML = `
+                            <td colspan="6" style="background: var(--section-bg); font-weight: 600; color: var(--text-primary); padding: 12px 10px;">
+                                ${mainCategory.name}
+                            </td>
+                            <td style="background: var(--section-bg); font-weight: 600; padding: 12px 10px; text-align: center;">
+                                <span class="stats-number">${mainCategoryPercentage}%</span>
+                            </td>
+                        `;
+                    }
                     tableBody.appendChild(headerRow);
                     
                     // Add subcategory rows
@@ -1379,6 +1619,7 @@
                                 <td><span class="stats-number">${inboundTime} min</span></td>
                                 <td><span class="stats-number">${outboundTime} min</span></td>
                                 <td><span class="stats-number">${totalTime} min</span></td>
+                                <td></td>
                             `;
                         } else {
                             row.innerHTML = `
@@ -1388,6 +1629,7 @@
                                 <td><span class="stats-number">${formatTime(outboundTime, true)}</span></td>
                                 <td><span class="stats-number">${formatTime(totalTime, true)}</span></td>
                                 <td><span class="stats-number">${formatTime(avgTime, false)}</span></td>
+                                <td></td>
                             `;
                         }
                         
@@ -1397,9 +1639,131 @@
             });
             
             if (!hasCategories) {
-                const colspan = isToday ? '5' : '6';
+                const colspan = isToday ? '6' : '7';
                 tableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: #718096;">No subcategories yet. Add subcategories to start tracking.</td></tr>`;
             }
+        }
+        
+        function exportStats(type) {
+            const isToday = type === 'today';
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const filename = `call-stats-${type}-${timestamp}.csv`;
+            
+            let totalCalls = 0;
+            
+            // Get time window
+            const timestamps = isToday ? callStats.todayTimestamps : callStats.allTimeTimestamps;
+            let timeWindow = 'No calls logged yet';
+            if (timestamps && timestamps.length > 0) {
+                const sortedTimestamps = [...timestamps].sort();
+                const firstCall = new Date(sortedTimestamps[0]);
+                const lastCall = new Date(sortedTimestamps[sortedTimestamps.length - 1]);
+                const formatDateTime = (date) => {
+                    return date.toLocaleString('fi-FI', { 
+                        year: 'numeric', 
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                };
+                timeWindow = `${formatDateTime(firstCall)} - ${formatDateTime(lastCall)}`;
+            }
+            
+            // Calculate total calls for percentage
+            const mainCategoryCalls = {};
+            Object.keys(categories).forEach(mainKey => {
+                const mainCategory = categories[mainKey];
+                const subcategories = mainCategory.subcategories;
+                mainCategoryCalls[mainKey] = 0;
+                
+                Object.keys(subcategories).forEach(subKey => {
+                    const categoryKey = `${mainKey}_${subKey}`;
+                    let callCount;
+                    
+                    if (isToday) {
+                        callCount = (callStats.today && callStats.today[categoryKey]) || 0;
+                    } else {
+                        callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                    }
+                    totalCalls += callCount;
+                    mainCategoryCalls[mainKey] += callCount;
+                });
+            });
+            
+            // Helper function to replace special characters
+            const normalizeText = (text) => {
+                return text.replace(/ä/g, 'a').replace(/Ä/g, 'A').replace(/ö/g, 'o').replace(/Ö/g, 'O');
+            };
+            
+            // Build CSV content
+            let csv = '';
+            
+            // Add header with time window
+            csv += `"Call Statistics Report - ${isToday ? 'Today' : 'All-Time'}"\n`;
+            csv += `"Time Window: ${timeWindow}"\n`;
+            csv += `"Total Calls: ${totalCalls}"\n`;
+            csv += '\n';
+            
+            if (isToday) {
+                csv += 'Main Category,Subcategory,Calls,Percentage,Inbound (min),Outbound (min),Total (min)\n';
+            } else {
+                csv += 'Main Category,Subcategory,Calls,Percentage,Inbound,Outbound,Total,Avg per Call\n';
+            }
+            
+            Object.keys(categories).forEach(mainKey => {
+                const mainCategory = categories[mainKey];
+                const subcategories = mainCategory.subcategories;
+                
+                // Calculate percentage for main category
+                const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
+                const normalizedMainCat = normalizeText(mainCategory.name);
+                
+                // Add main category header row
+                csv += `"${normalizedMainCat}","",,"${mainCategoryPercentage}%",,,\n`;
+                
+                Object.keys(subcategories).forEach(subKey => {
+                    const categoryKey = `${mainKey}_${subKey}`;
+                    
+                    let callCount, inboundTime, outboundTime;
+                    
+                    if (isToday) {
+                        callCount = (callStats.today && callStats.today[categoryKey]) || 0;
+                        inboundTime = (callStats.todayInbound && callStats.todayInbound[categoryKey]) || 0;
+                        outboundTime = (callStats.todayOutbound && callStats.todayOutbound[categoryKey]) || 0;
+                    } else {
+                        callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                        inboundTime = (callStats.allTimeInbound && callStats.allTimeInbound[categoryKey]) || 0;
+                        outboundTime = (callStats.allTimeOutbound && callStats.allTimeOutbound[categoryKey]) || 0;
+                    }
+                    
+                    const totalTime = inboundTime + outboundTime;
+                    const avgTime = callCount > 0 ? Math.round(totalTime / callCount) : 0;
+                    
+                    // Normalize names to remove special characters
+                    const normalizedSubCat = normalizeText(subcategories[subKey].name);
+                    
+                    if (isToday) {
+                        csv += `"","${normalizedSubCat}",${callCount},,${inboundTime},${outboundTime},${totalTime}\n`;
+                    } else {
+                        csv += `"","${normalizedSubCat}",${callCount},,"${formatTime(inboundTime, true)}","${formatTime(outboundTime, true)}","${formatTime(totalTime, true)}","${formatTime(avgTime, false)}"\n`;
+                    }
+                });
+            });
+            
+            // Create download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification(`Stats exported to ${filename}`);
         }
         
         function saveTemplates() {
@@ -1492,11 +1856,11 @@
             // Show main category info with delete option
             const mainItem = document.createElement('div');
             mainItem.className = 'template-item';
-            mainItem.style.background = '#edf2f7';
+            mainItem.style.background = 'var(--section-bg)';
             mainItem.innerHTML = `
                 <div class="template-item-content">
-                    <h3 style="color: #667eea;">📁 ${mainCategory.name}</h3>
-                    <small style="color: #718096;">Main Category</small>
+                    <h3 style="color: var(--button-bg);">📁 ${mainCategory.name}</h3>
+                    <small style="color: var(--text-secondary);">Main Category</small>
                 </div>
                 <div class="template-item-actions">
                     <button class="btn-delete" onclick="deleteMainCategory('${selectedMainKey}')">🗑️ Delete Category</button>
@@ -1659,6 +2023,7 @@
 
         // Add initial time entries on load
         window.onload = function() {
+            loadDarkModePreference();
             initCategories();
             loadCustomFields();
             addTimeEntry('inbound');
@@ -1691,7 +2056,6 @@
                            placeholder="Min" 
                            min="0" 
                            onchange="updateTotalTime(); generateTemplate();">
-                    <button onclick="removeTimeEntry('inbound', ${inboundCount})">×</button>
                 `;
                 container.appendChild(entry);
             } else {
@@ -1706,7 +2070,6 @@
                            placeholder="Min" 
                            min="0" 
                            onchange="updateTotalTime(); generateTemplate();">
-                    <button onclick="removeTimeEntry('outbound', ${outboundCount})">×</button>
                 `;
                 container.appendChild(entry);
             }
@@ -1960,4 +2323,3 @@
     </script>
 </body>
 </html>
-
