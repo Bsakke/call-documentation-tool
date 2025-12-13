@@ -704,6 +704,19 @@
             background: #38a169;
         }
         
+        #undoButton {
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        #undoButton:hover {
+            background: #f56565 !important;
+            transform: scale(1.02);
+        }
+        
+        body.dark-mode #undoButton {
+            opacity: 0.95;
+        }
+        
         .stats-container {
             background: var(--container-bg);
             border: 2px solid var(--border-color);
@@ -955,6 +968,9 @@
                         </div>
                     </div>
                     <button class="log-call-btn" onclick="logCall()" style="margin-top: 15px;">✓ Log This Call</button>
+                    <button id="undoButton" onclick="undoLastCall()" style="display: none; margin-top: 10px; width: 100%; background: #fc8181; color: white; border: none; border-radius: 6px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        ↩️ Undo Last Call (60s)
+                    </button>
                 </div>
                 
                 <!-- Additional Notes -->
@@ -1249,6 +1265,9 @@
         let lastLoggedMainCategory = '';
         let lastLoggedSubCategory = '';
         let customFields = [];
+        let lastLoggedCall = null;
+        let undoTimeout = null;
+        let undoCountdownInterval = null;
         
         // Dark mode management
         function toggleDarkMode() {
@@ -1377,37 +1396,130 @@
             localStorage.setItem('callStats', JSON.stringify(callStats));
         }
         
+        function undoLastCall() {
+            if (!lastLoggedCall) {
+                alert('No recent call to undo!');
+                return;
+            }
+            
+            const call = lastLoggedCall;
+            
+            // Decrement counters
+            if (callStats.today[call.categoryKey]) {
+                callStats.today[call.categoryKey]--;
+                if (callStats.today[call.categoryKey] === 0) {
+                    delete callStats.today[call.categoryKey];
+                }
+            }
+            
+            if (callStats.todayInbound[call.categoryKey]) {
+                callStats.todayInbound[call.categoryKey] -= call.inboundMinutes;
+                if (callStats.todayInbound[call.categoryKey] === 0) {
+                    delete callStats.todayInbound[call.categoryKey];
+                }
+            }
+            
+            if (callStats.todayOutbound[call.categoryKey]) {
+                callStats.todayOutbound[call.categoryKey] -= call.outboundMinutes;
+                if (callStats.todayOutbound[call.categoryKey] === 0) {
+                    delete callStats.todayOutbound[call.categoryKey];
+                }
+            }
+            
+            if (callStats.allTime[call.categoryKey]) {
+                callStats.allTime[call.categoryKey]--;
+                if (callStats.allTime[call.categoryKey] === 0) {
+                    delete callStats.allTime[call.categoryKey];
+                }
+            }
+            
+            if (callStats.allTimeInbound[call.categoryKey]) {
+                callStats.allTimeInbound[call.categoryKey] -= call.inboundMinutes;
+                if (callStats.allTimeInbound[call.categoryKey] === 0) {
+                    delete callStats.allTimeInbound[call.categoryKey];
+                }
+            }
+            
+            if (callStats.allTimeOutbound[call.categoryKey]) {
+                callStats.allTimeOutbound[call.categoryKey] -= call.outboundMinutes;
+                if (callStats.allTimeOutbound[call.categoryKey] === 0) {
+                    delete callStats.allTimeOutbound[call.categoryKey];
+                }
+            }
+            
+            // Remove timestamps
+            if (callStats.todayTimestamps) {
+                const index = callStats.todayTimestamps.indexOf(call.timestamp);
+                if (index > -1) {
+                    callStats.todayTimestamps.splice(index, 1);
+                }
+            }
+            
+            if (callStats.allTimeTimestamps) {
+                const index = callStats.allTimeTimestamps.indexOf(call.timestamp);
+                if (index > -1) {
+                    callStats.allTimeTimestamps.splice(index, 1);
+                }
+            }
+            
+            saveCallStats();
+            updateStatsDisplay();
+            updateTotalTime();
+            
+            // Clear undo data
+            lastLoggedCall = null;
+            if (undoTimeout) clearTimeout(undoTimeout);
+            hideUndoButton();
+            
+            showNotification('Last call undone successfully!');
+        }
+        
+        function showUndoButton() {
+            const undoBtn = document.getElementById('undoButton');
+            if (undoBtn) {
+                undoBtn.style.display = 'block';
+                
+                // Start countdown
+                let secondsLeft = 60;
+                updateUndoButtonText(secondsLeft);
+                
+                if (undoCountdownInterval) clearInterval(undoCountdownInterval);
+                undoCountdownInterval = setInterval(() => {
+                    secondsLeft--;
+                    updateUndoButtonText(secondsLeft);
+                    
+                    if (secondsLeft <= 0) {
+                        clearInterval(undoCountdownInterval);
+                    }
+                }, 1000);
+            }
+        }
+        
+        function updateUndoButtonText(seconds) {
+            const undoBtn = document.getElementById('undoButton');
+            if (undoBtn) {
+                undoBtn.textContent = `↩️ Undo Last Call (${seconds}s)`;
+            }
+        }
+        
+        function hideUndoButton() {
+            const undoBtn = document.getElementById('undoButton');
+            if (undoBtn) {
+                undoBtn.style.display = 'none';
+            }
+            if (undoCountdownInterval) {
+                clearInterval(undoCountdownInterval);
+                undoCountdownInterval = null;
+            }
+        }
+        
         function logCall() {
             const mainCategoryKey = document.getElementById('mainCategory').value;
             const subCategoryKey = document.getElementById('subCategory').value;
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const phoneNumber = document.getElementById('phoneNumber').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const bpn = document.getElementById('bpn').value.trim();
             
             // Check if required fields are filled
             if (!mainCategoryKey || !subCategoryKey) {
                 alert('Error: Please select both main category and subcategory!');
-                return;
-            }
-            
-            // Check if at least one field is filled (including custom fields)
-            let hasCustomerInfo = firstName || lastName || phoneNumber || email || bpn;
-            
-            if (!hasCustomerInfo) {
-                // Check custom fields
-                for (let i = 0; i < customFields.length; i++) {
-                    const customFieldValue = document.getElementById(`customField${i}`)?.value.trim();
-                    if (customFieldValue) {
-                        hasCustomerInfo = true;
-                        break;
-                    }
-                }
-            }
-            
-            if (!hasCustomerInfo) {
-                alert('Error: Please fill in at least one customer information field (First Name, Last Name, Phone, Email, BPN, or any custom field)!');
                 return;
             }
             
@@ -1462,9 +1574,27 @@
             callStats.todayTimestamps.push(currentTimestamp);
             callStats.allTimeTimestamps.push(currentTimestamp);
             
+            // Store last logged call for undo functionality
+            lastLoggedCall = {
+                categoryKey: categoryKey,
+                mainCategoryKey: mainCategoryKey,
+                subCategoryKey: subCategoryKey,
+                inboundMinutes: inboundMinutes,
+                outboundMinutes: outboundMinutes,
+                timestamp: currentTimestamp
+            };
+            
             saveCallStats();
             updateStatsDisplay();
             showNotification('Call logged successfully!');
+            showUndoButton();
+            
+            // Clear undo option after 60 seconds
+            if (undoTimeout) clearTimeout(undoTimeout);
+            undoTimeout = setTimeout(() => {
+                hideUndoButton();
+                lastLoggedCall = null;
+            }, 60000);
             
             // Clear all customer information fields
             document.getElementById('firstName').value = '';
@@ -1566,75 +1696,129 @@
                 if (Object.keys(subcategories).length > 0) {
                     hasCategories = true;
                     
-                    // Calculate percentage for main category
-                    const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
+                    // Calculate totals for main category
+                    let mainCategoryCallCount = 0;
+                    let mainCategoryInbound = 0;
+                    let mainCategoryOutbound = 0;
                     
-                    // Add main category header row with percentage
-                    const headerRow = document.createElement('tr');
-                    headerRow.innerHTML = `
-                        <td colspan="5" style="background: var(--section-bg); font-weight: 600; color: var(--text-primary); padding: 12px 10px;">
-                            ${mainCategory.name}
-                        </td>
-                        <td style="background: var(--section-bg); font-weight: 600; padding: 12px 10px; text-align: center;">
-                            <span class="stats-number">${mainCategoryPercentage}%</span>
-                        </td>
-                    `;
-                    if (!isToday) {
-                        headerRow.innerHTML = `
-                            <td colspan="6" style="background: var(--section-bg); font-weight: 600; color: var(--text-primary); padding: 12px 10px;">
-                                ${mainCategory.name}
-                            </td>
-                            <td style="background: var(--section-bg); font-weight: 600; padding: 12px 10px; text-align: center;">
-                                <span class="stats-number">${mainCategoryPercentage}%</span>
-                            </td>
-                        `;
-                    }
-                    tableBody.appendChild(headerRow);
-                    
-                    // Add subcategory rows
                     Object.keys(subcategories).forEach(subKey => {
                         const categoryKey = `${mainKey}_${subKey}`;
-                        
-                        let callCount, inboundTime, outboundTime;
-                        
                         if (isToday) {
-                            callCount = (callStats.today && callStats.today[categoryKey]) || 0;
-                            inboundTime = (callStats.todayInbound && callStats.todayInbound[categoryKey]) || 0;
-                            outboundTime = (callStats.todayOutbound && callStats.todayOutbound[categoryKey]) || 0;
+                            mainCategoryCallCount += (callStats.today && callStats.today[categoryKey]) || 0;
+                            mainCategoryInbound += (callStats.todayInbound && callStats.todayInbound[categoryKey]) || 0;
+                            mainCategoryOutbound += (callStats.todayOutbound && callStats.todayOutbound[categoryKey]) || 0;
                         } else {
-                            callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
-                            inboundTime = (callStats.allTimeInbound && callStats.allTimeInbound[categoryKey]) || 0;
-                            outboundTime = (callStats.allTimeOutbound && callStats.allTimeOutbound[categoryKey]) || 0;
+                            mainCategoryCallCount += (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                            mainCategoryInbound += (callStats.allTimeInbound && callStats.allTimeInbound[categoryKey]) || 0;
+                            mainCategoryOutbound += (callStats.allTimeOutbound && callStats.allTimeOutbound[categoryKey]) || 0;
                         }
-                        
-                        const totalTime = inboundTime + outboundTime;
-                        const avgTime = callCount > 0 ? Math.round(totalTime / callCount) : 0;
-                        
-                        const row = document.createElement('tr');
-                        
-                        if (isToday) {
-                            row.innerHTML = `
-                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
-                                <td><span class="stats-number">${callCount}</span></td>
-                                <td><span class="stats-number">${inboundTime} min</span></td>
-                                <td><span class="stats-number">${outboundTime} min</span></td>
-                                <td><span class="stats-number">${totalTime} min</span></td>
-                                <td></td>
-                            `;
-                        } else {
-                            row.innerHTML = `
-                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
-                                <td><span class="stats-number">${callCount}</span></td>
-                                <td><span class="stats-number">${formatTime(inboundTime, true)}</span></td>
-                                <td><span class="stats-number">${formatTime(outboundTime, true)}</span></td>
-                                <td><span class="stats-number">${formatTime(totalTime, true)}</span></td>
-                                <td><span class="stats-number">${formatTime(avgTime, false)}</span></td>
-                                <td></td>
-                            `;
-                        }
-                        
-                        tableBody.appendChild(row);
                     });
+                    
+                    const mainCategoryTotal = mainCategoryInbound + mainCategoryOutbound;
+                    const mainCategoryAvg = mainCategoryCallCount > 0 ? Math.round(mainCategoryTotal / mainCategoryCallCount) : 0;
+                    const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
+                    
+                    // Only show main category if it has calls
+                    if (mainCategoryCallCount > 0) {
+                        // Add main category header row with totals
+                        const headerRow = document.createElement('tr');
+                        headerRow.style.borderTop = '3px solid var(--border-color)';
+                        if (isToday) {
+                            headerRow.innerHTML = `
+                                <td style="background: var(--section-bg); font-weight: 700; color: var(--button-bg); font-size: 14px; padding: 14px 10px; border-top: 3px solid var(--border-color);">
+                                    ${mainCategory.name}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${mainCategoryCallCount}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${mainCategoryInbound} min
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${mainCategoryOutbound} min
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${mainCategoryTotal} min
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; text-align: center; border-top: 3px solid var(--border-color); color: var(--button-bg); font-size: 14px;">
+                                    ${mainCategoryPercentage}%
+                                </td>
+                            `;
+                        } else {
+                            headerRow.innerHTML = `
+                                <td style="background: var(--section-bg); font-weight: 700; color: var(--button-bg); font-size: 14px; padding: 14px 10px; border-top: 3px solid var(--border-color);">
+                                    ${mainCategory.name}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${mainCategoryCallCount}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${formatTime(mainCategoryInbound, true)}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${formatTime(mainCategoryOutbound, true)}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${formatTime(mainCategoryTotal, true)}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; border-top: 3px solid var(--border-color); color: var(--text-primary);">
+                                    ${formatTime(mainCategoryAvg, false)}
+                                </td>
+                                <td style="background: var(--section-bg); font-weight: 700; padding: 14px 10px; text-align: center; border-top: 3px solid var(--border-color); color: var(--button-bg); font-size: 14px;">
+                                    ${mainCategoryPercentage}%
+                                </td>
+                            `;
+                        }
+                        tableBody.appendChild(headerRow);
+                        
+                        // Add subcategory rows (only those with calls)
+                        Object.keys(subcategories).forEach(subKey => {
+                            const categoryKey = `${mainKey}_${subKey}`;
+                            
+                            let callCount, inboundTime, outboundTime;
+                            
+                            if (isToday) {
+                                callCount = (callStats.today && callStats.today[categoryKey]) || 0;
+                                inboundTime = (callStats.todayInbound && callStats.todayInbound[categoryKey]) || 0;
+                                outboundTime = (callStats.todayOutbound && callStats.todayOutbound[categoryKey]) || 0;
+                            } else {
+                                callCount = (callStats.allTime && callStats.allTime[categoryKey]) || 0;
+                                inboundTime = (callStats.allTimeInbound && callStats.allTimeInbound[categoryKey]) || 0;
+                                outboundTime = (callStats.allTimeOutbound && callStats.allTimeOutbound[categoryKey]) || 0;
+                            }
+                            
+                            // Only show subcategory if it has calls
+                            if (callCount > 0) {
+                                const totalTime = inboundTime + outboundTime;
+                                const avgTime = callCount > 0 ? Math.round(totalTime / callCount) : 0;
+                                
+                                const row = document.createElement('tr');
+                                
+                                if (isToday) {
+                                    row.innerHTML = `
+                                        <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
+                                        <td><span class="stats-number">${callCount}</span></td>
+                                        <td><span class="stats-number">${inboundTime} min</span></td>
+                                        <td><span class="stats-number">${outboundTime} min</span></td>
+                                        <td><span class="stats-number">${totalTime} min</span></td>
+                                        <td></td>
+                                    `;
+                                } else {
+                                    row.innerHTML = `
+                                        <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
+                                        <td><span class="stats-number">${callCount}</span></td>
+                                        <td><span class="stats-number">${formatTime(inboundTime, true)}</span></td>
+                                        <td><span class="stats-number">${formatTime(outboundTime, true)}</span></td>
+                                        <td><span class="stats-number">${formatTime(totalTime, true)}</span></td>
+                                        <td><span class="stats-number">${formatTime(avgTime, false)}</span></td>
+                                        <td></td>
+                                    `;
+                                }
+                                
+                                tableBody.appendChild(row);
+                            }
+                        });
+                    }
                 }
             });
             
@@ -2085,30 +2269,23 @@
         }
 
         function updateTotalTime() {
-            let inboundTotal = 0;
-            let outboundTotal = 0;
+            let currentInbound = 0;
+            let currentOutbound = 0;
             
-            // Calculate inbound total from current input fields
+            // Calculate current call's inbound/outbound from input fields
             const inboundInputs = document.querySelectorAll('[id^="inboundTime"]');
             inboundInputs.forEach(input => {
                 const value = parseInt(input.value) || 0;
-                inboundTotal += value;
+                currentInbound += value;
             });
             
-            // Calculate outbound total from current input fields
             const outboundInputs = document.querySelectorAll('[id^="outboundTime"]');
             outboundInputs.forEach(input => {
                 const value = parseInt(input.value) || 0;
-                outboundTotal += value;
+                currentOutbound += value;
             });
             
-            const grandTotal = inboundTotal + outboundTotal;
-            
-            // Update current input totals (for the summary and current logging)
-            document.getElementById('inboundTotal').textContent = `Inbound: ${inboundTotal} min`;
-            document.getElementById('outboundTotal').textContent = `Outbound: ${outboundTotal} min`;
-            
-            // Calculate total from logged calls for "Total Today"
+            // Calculate total from all logged calls today
             let totalLoggedInbound = 0;
             let totalLoggedOutbound = 0;
             
@@ -2124,10 +2301,17 @@
                 });
             }
             
-            const totalLoggedTime = totalLoggedInbound + totalLoggedOutbound;
-            document.getElementById('grandTotal').textContent = `Total Today: ${totalLoggedTime} minutes`;
+            // Add current call minutes to logged totals for display
+            const totalInboundWithCurrent = totalLoggedInbound + currentInbound;
+            const totalOutboundWithCurrent = totalLoggedOutbound + currentOutbound;
+            const totalDailyTime = totalInboundWithCurrent + totalOutboundWithCurrent;
             
-            return { inbound: inboundTotal, outbound: outboundTotal, total: grandTotal };
+            // Update displays with combined totals
+            document.getElementById('inboundTotal').textContent = `Inbound: ${totalInboundWithCurrent} min`;
+            document.getElementById('outboundTotal').textContent = `Outbound: ${totalOutboundWithCurrent} min`;
+            document.getElementById('grandTotal').textContent = `Total Today: ${totalDailyTime} minutes`;
+            
+            return { inbound: currentInbound, outbound: currentOutbound, total: currentInbound + currentOutbound };
         }
 
         function copyField(fieldId) {
