@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deck 2</title>
+    <title>Deck 2.0</title>
     <style>
         * {
             margin: 0;
@@ -778,7 +778,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>📞 Deck 2</h1>
+            <h1>📞 Deck 2.0</h1>
             <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
         </header>
         
@@ -789,17 +789,11 @@
                     <h2>Issue Category</h2>
                     <div class="field-group">
                         <label for="mainCategory">Main Category:</label>
-                        <div class="field-with-copy">
-                            <select id="mainCategory" onchange="updateSubcategoryDropdown()"></select>
-                            <button class="copy-field-btn" onclick="copyField('mainCategory')">Copy</button>
-                        </div>
+                        <select id="mainCategory" onchange="updateSubcategoryDropdown()"></select>
                     </div>
                     <div class="field-group">
                         <label for="subCategory">Subcategory:</label>
-                        <div class="field-with-copy">
-                            <select id="subCategory" onchange="generateTemplate()"></select>
-                            <button class="copy-field-btn" onclick="copyField('subCategory')">Copy</button>
-                        </div>
+                        <select id="subCategory" onchange="generateTemplate()"></select>
                     </div>
                     <div class="button-group">
                         <button onclick="openCategoryManager()" style="width: 100%; background: #805ad5; color: white;">📝 Manage Categories</button>
@@ -808,17 +802,18 @@
                 
                 <!-- Customer Info -->
                 <div class="section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h2 style="margin: 0;">Customer Information</h2>
-                        <button onclick="openCustomerFieldsManager()" style="background: #805ad5; color: white; padding: 8px 16px; font-size: 13px;">⚙️ Manage Fields</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: pointer;" onclick="toggleCustomerSection()">
+                        <h2 style="margin: 0;"><span id="customerSectionToggle">▼</span> Customer Information</h2>
+                        <button onclick="event.stopPropagation(); openCustomerFieldsManager()" style="background: #805ad5; color: white; padding: 8px 16px; font-size: 13px;">⚙️ Manage Fields</button>
                     </div>
                     
+                    <div id="customerFieldsSection">
                     <!-- Common fields for all categories -->
                     <div class="field-group">
                         <label for="firstName">First Name:</label>
                         <div class="field-with-copy">
                             <input type="text" id="firstName" placeholder="Enter first name" oninput="generateTemplate()">
-                            <button class="copy-field-btn" onclick="copyField('firstName')">Copy</button>
+                            <button class="copy-field-btn" tabindex="-1" onclick="copyField('firstName')">Copy</button>
                         </div>
                     </div>
                     
@@ -826,7 +821,7 @@
                         <label for="lastName">Last Name:</label>
                         <div class="field-with-copy">
                             <input type="text" id="lastName" placeholder="Enter last name" oninput="generateTemplate()">
-                            <button class="copy-field-btn" onclick="copyField('lastName')">Copy</button>
+                            <button class="copy-field-btn" tabindex="-1" onclick="copyField('lastName')">Copy</button>
                         </div>
                     </div>
                     
@@ -834,7 +829,7 @@
                         <label for="phoneNumber">Phone Number:</label>
                         <div class="field-with-copy">
                             <input type="text" id="phoneNumber" placeholder="Enter phone number" oninput="generateTemplate()">
-                            <button class="copy-field-btn" onclick="copyField('phoneNumber')">Copy</button>
+                            <button class="copy-field-btn" tabindex="-1" onclick="copyField('phoneNumber')">Copy</button>
                         </div>
                     </div>
                     
@@ -842,7 +837,7 @@
                         <label for="email">Email:</label>
                         <div class="field-with-copy">
                             <input type="text" id="email" placeholder="Enter email address" oninput="generateTemplate()">
-                            <button class="copy-field-btn" onclick="copyField('email')">Copy</button>
+                            <button class="copy-field-btn" tabindex="-1" onclick="copyField('email')">Copy</button>
                         </div>
                     </div>
                     
@@ -850,7 +845,7 @@
                         <label for="bpn">BPN:</label>
                         <div class="field-with-copy">
                             <input type="text" id="bpn" placeholder="Enter BPN" oninput="generateTemplate()">
-                            <button class="copy-field-btn" onclick="copyField('bpn')">Copy</button>
+                            <button class="copy-field-btn" tabindex="-1" onclick="copyField('bpn')">Copy</button>
                         </div>
                     </div>
                     
@@ -863,7 +858,7 @@
                             <label for="ytunnus">Y-tunnus:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="ytunnus" placeholder="Enter Y-tunnus" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('ytunnus')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('ytunnus')">Copy</button>
                             </div>
                         </div>
                         
@@ -875,7 +870,7 @@
                             <label for="contact2Name">Full Name:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="contact2Name" placeholder="Enter full name" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('contact2Name')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('contact2Name')">Copy</button>
                             </div>
                         </div>
                         
@@ -883,7 +878,7 @@
                             <label for="contact2Phone">Phone:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="contact2Phone" placeholder="Enter phone number" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('contact2Phone')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('contact2Phone')">Copy</button>
                             </div>
                         </div>
                         
@@ -891,7 +886,7 @@
                             <label for="contact2Email">Email:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="contact2Email" placeholder="Enter email address" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('contact2Email')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('contact2Email')">Copy</button>
                             </div>
                         </div>
                         
@@ -903,7 +898,7 @@
                             <label for="ticketNumber1">Ticket Number 1:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="ticketNumber1" placeholder="e.g., TK-12345" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('ticketNumber1')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('ticketNumber1')">Copy</button>
                             </div>
                         </div>
                         
@@ -911,7 +906,7 @@
                             <label for="ticketNumber2">Ticket Number 2:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="ticketNumber2" placeholder="e.g., TK-67890" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('ticketNumber2')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('ticketNumber2')">Copy</button>
                             </div>
                         </div>
                         
@@ -919,7 +914,7 @@
                             <label for="id1">ID 1:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="id1" placeholder="Enter ID 1" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('id1')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('id1')">Copy</button>
                             </div>
                         </div>
                         
@@ -927,9 +922,10 @@
                             <label for="id2">ID 2:</label>
                             <div class="field-with-copy">
                                 <input type="text" id="id2" placeholder="Enter ID 2" oninput="generateTemplate()">
-                                <button class="copy-field-btn" onclick="copyField('id2')">Copy</button>
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('id2')">Copy</button>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
                 
@@ -941,22 +937,22 @@
                             <div class="time-column">
                                 <h3>📞 Inbound Minutes</h3>
                                 <div class="quick-minutes">
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 1)">1</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 2)">2</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 3)">3</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 4)">4</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('inbound', 5)">5</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('inbound', 1)">1</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('inbound', 2)">2</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('inbound', 3)">3</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('inbound', 4)">4</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('inbound', 5)">5</button>
                                 </div>
                                 <div id="inboundEntries"></div>
                             </div>
                             <div class="time-column">
                                 <h3>📱 Outbound Minutes</h3>
                                 <div class="quick-minutes">
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 1)">1</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 2)">2</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 3)">3</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 4)">4</button>
-                                    <button class="quick-min-btn" onclick="addQuickMinutes('outbound', 5)">5</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('outbound', 1)">1</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('outbound', 2)">2</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('outbound', 3)">3</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('outbound', 4)">4</button>
+                                    <button class="quick-min-btn" tabindex="-1" onclick="addQuickMinutes('outbound', 5)">5</button>
                                 </div>
                                 <div id="outboundEntries"></div>
                             </div>
@@ -971,17 +967,6 @@
                     <button id="undoButton" onclick="undoLastCall()" style="display: none; margin-top: 10px; width: 100%; background: #fc8181; color: white; border: none; border-radius: 6px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">
                         ↩️ Undo Last Call (60s)
                     </button>
-                </div>
-                
-                <!-- Additional Notes -->
-                <div class="section">
-                    <div class="field-group">
-                        <label for="additionalNotes">Additional Notes (Optional):</label>
-                        <div class="field-with-copy">
-                            <textarea id="additionalNotes" placeholder="Any extra details..." oninput="generateTemplate()"></textarea>
-                            <button class="copy-field-btn" onclick="copyField('additionalNotes')">Copy</button>
-                        </div>
-                    </div>
                 </div>
                 
 
@@ -1288,6 +1273,31 @@
             }
         }
         
+        // Customer section collapse management
+        function toggleCustomerSection() {
+            const section = document.getElementById('customerFieldsSection');
+            const toggle = document.getElementById('customerSectionToggle');
+            const isCollapsed = section.style.display === 'none';
+            
+            if (isCollapsed) {
+                section.style.display = 'block';
+                toggle.textContent = '▼';
+                localStorage.setItem('customerSectionCollapsed', 'false');
+            } else {
+                section.style.display = 'none';
+                toggle.textContent = '▶';
+                localStorage.setItem('customerSectionCollapsed', 'true');
+            }
+        }
+        
+        function loadCustomerSectionState() {
+            const isCollapsed = localStorage.getItem('customerSectionCollapsed') === 'true';
+            if (isCollapsed) {
+                document.getElementById('customerFieldsSection').style.display = 'none';
+                document.getElementById('customerSectionToggle').textContent = '▶';
+            }
+        }
+        
         // Quick minutes function
         function addQuickMinutes(type, minutes) {
             const count = type === 'inbound' ? inboundCount : outboundCount;
@@ -1331,7 +1341,7 @@
                     <label for="customField${index}">${field.name}:</label>
                     <div class="field-with-copy">
                         <input type="text" id="customField${index}" placeholder="Enter ${field.name}" oninput="generateTemplate()">
-                        <button class="copy-field-btn" onclick="copyField('customField${index}')">Copy</button>
+                        <button class="copy-field-btn" tabindex="-1" onclick="copyField('customField${index}')">Copy</button>
                     </div>
                 `;
                 container.appendChild(fieldGroup);
@@ -1618,9 +1628,6 @@
             document.getElementById('ticketNumber2').value = '';
             document.getElementById('id1').value = '';
             document.getElementById('id2').value = '';
-            
-            // Clear additional notes
-            document.getElementById('additionalNotes').value = '';
             
             // Clear all time input fields
             document.querySelectorAll('[id^="inboundTime"]').forEach(input => {
@@ -2208,6 +2215,7 @@
         // Add initial time entries on load
         window.onload = function() {
             loadDarkModePreference();
+            loadCustomerSectionState();
             initCategories();
             loadCustomFields();
             addTimeEntry('inbound');
@@ -2237,7 +2245,7 @@
                 entry.innerHTML = `
                     <input type="number" 
                            id="inboundTime${inboundCount}" 
-                           placeholder="Min" 
+                           placeholder="Minutes" 
                            min="0" 
                            onchange="updateTotalTime(); generateTemplate();">
                 `;
@@ -2251,7 +2259,7 @@
                 entry.innerHTML = `
                     <input type="number" 
                            id="outboundTime${outboundCount}" 
-                           placeholder="Min" 
+                           placeholder="Minutes" 
                            min="0" 
                            onchange="updateTotalTime(); generateTemplate();">
                 `;
@@ -2353,7 +2361,6 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
             const email = document.getElementById('email').value;
             const bpn = document.getElementById('bpn').value;
-            const additionalNotes = document.getElementById('additionalNotes').value;
             const timeData = updateTotalTime();
 
             // Käyttötuki-specific fields
@@ -2425,10 +2432,6 @@
             
             if (template) {
                 summary += `${template}\n`;
-            }
-            
-            if (additionalNotes) {
-                summary += `${additionalNotes}\n`;
             }
 
             createSection(outputDiv, 'Complete Summary', summary, 'summary');
@@ -2503,7 +2506,6 @@
         document.getElementById('ticketNumber2').addEventListener('input', generateTemplate);
         document.getElementById('id1').addEventListener('input', generateTemplate);
         document.getElementById('id2').addEventListener('input', generateTemplate);
-        document.getElementById('additionalNotes').addEventListener('input', generateTemplate);
     </script>
 </body>
 </html>
