@@ -716,6 +716,29 @@ body.dark-mode .modal {
     transition: color 0.3s ease;
 }
 
+.stats-header-row {
+    border-top: 3px solid var(--border-color);
+}
+
+.stats-header-cell {
+    background: var(--section-bg);
+    font-weight: 700;
+    padding: 14px 10px;
+    border-top: 3px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.stats-header-cell:first-child {
+    color: var(--button-bg);
+    font-size: 14px;
+}
+
+.stats-header-cell.stats-percentage {
+    text-align: center;
+    color: var(--button-bg);
+    font-size: 14px;
+}
+
 /* Misc */
 small {
     color: var(--text-secondary);

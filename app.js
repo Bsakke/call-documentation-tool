@@ -71,6 +71,64 @@ function getStatsForCategory(categoryKey, isToday) {
     };
 }
 
+/**
+ * Generate a sanitized key from a name
+ */
+function generateKey(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
+/**
+ * Calculate category statistics
+ */
+function calculateCategoryStats(isToday) {
+    let totalCalls = 0;
+    const mainCategoryCalls = {};
+    const categoryDetails = {};
+    
+    Object.keys(categories).forEach(mainKey => {
+        const subcategories = categories[mainKey].subcategories;
+        mainCategoryCalls[mainKey] = 0;
+        categoryDetails[mainKey] = {
+            name: categories[mainKey].name,
+            subcategories: {},
+            totals: { calls: 0, inbound: 0, outbound: 0 }
+        };
+        
+        Object.keys(subcategories).forEach(subKey => {
+            const categoryKey = `${mainKey}_${subKey}`;
+            const stats = getStatsForCategory(categoryKey, isToday);
+            totalCalls += stats.calls;
+            mainCategoryCalls[mainKey] += stats.calls;
+            
+            categoryDetails[mainKey].totals.calls += stats.calls;
+            categoryDetails[mainKey].totals.inbound += stats.inbound;
+            categoryDetails[mainKey].totals.outbound += stats.outbound;
+            categoryDetails[mainKey].subcategories[subKey] = {
+                name: subcategories[subKey].name,
+                stats: stats
+            };
+        });
+    });
+    
+    return { totalCalls, mainCategoryCalls, categoryDetails };
+}
+
+/**
+ * Create empty state message element
+ */
+function createEmptyState(message, colspan = null) {
+    if (colspan) {
+        return `<tr><td colspan="${colspan}" style="text-align: center; color: var(--text-secondary);">${message}</td></tr>`;
+    }
+    const div = document.createElement('div');
+    div.style.padding = '20px';
+    div.style.textAlign = 'center';
+    div.style.color = 'var(--text-secondary)';
+    div.textContent = message;
+    return div;
+}
+
 // ===== CATEGORY MANAGEMENT =====
 
 function getDefaultCategories() {
@@ -208,66 +266,40 @@ function updateStatsTable(tableBodyId, isToday) {
     const tableBody = document.getElementById(tableBodyId);
     tableBody.innerHTML = '';
     
+    const { totalCalls, mainCategoryCalls, categoryDetails } = calculateCategoryStats(isToday);
+    
     let hasCategories = false;
-    let totalCalls = 0;
-    const mainCategoryCalls = {};
     
-    // Calculate totals
-    Object.keys(categories).forEach(mainKey => {
-        const subcategories = categories[mainKey].subcategories;
-        mainCategoryCalls[mainKey] = 0;
+    // Render categories using pre-calculated stats
+    Object.keys(categoryDetails).forEach(mainKey => {
+        const mainCat = categoryDetails[mainKey];
         
-        Object.keys(subcategories).forEach(subKey => {
-            const categoryKey = `${mainKey}_${subKey}`;
-            const stats = getStatsForCategory(categoryKey, isToday);
-            totalCalls += stats.calls;
-            mainCategoryCalls[mainKey] += stats.calls;
-        });
-    });
-    
-    // Render categories
-    Object.keys(categories).forEach(mainKey => {
-        const mainCategory = categories[mainKey];
-        const subcategories = mainCategory.subcategories;
-        
-        if (Object.keys(subcategories).length > 0) {
+        if (Object.keys(mainCat.subcategories).length > 0) {
             hasCategories = true;
             
-            let mainCategoryCallCount = 0;
-            let mainCategoryInbound = 0;
-            let mainCategoryOutbound = 0;
-            
-            Object.keys(subcategories).forEach(subKey => {
-                const categoryKey = `${mainKey}_${subKey}`;
-                const stats = getStatsForCategory(categoryKey, isToday);
-                mainCategoryCallCount += stats.calls;
-                mainCategoryInbound += stats.inbound;
-                mainCategoryOutbound += stats.outbound;
-            });
-            
-            const mainCategoryTotal = mainCategoryInbound + mainCategoryOutbound;
-            const mainCategoryAvg = mainCategoryCallCount > 0 ? Math.round(mainCategoryTotal / mainCategoryCallCount) : 0;
+            const mainCategoryTotal = mainCat.totals.inbound + mainCat.totals.outbound;
+            const mainCategoryAvg = mainCat.totals.calls > 0 ? Math.round(mainCategoryTotal / mainCat.totals.calls) : 0;
             const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
             
-            if (mainCategoryCallCount > 0) {
+            if (mainCat.totals.calls > 0) {
                 const headerRow = document.createElement('tr');
                 headerRow.className = 'stats-header-row';
                 
                 if (isToday) {
                     headerRow.innerHTML = `
-                        <td class="stats-header-cell">${mainCategory.name}</td>
-                        <td class="stats-header-cell">${mainCategoryCallCount}</td>
-                        <td class="stats-header-cell">${mainCategoryInbound} min</td>
-                        <td class="stats-header-cell">${mainCategoryOutbound} min</td>
+                        <td class="stats-header-cell">${mainCat.name}</td>
+                        <td class="stats-header-cell">${mainCat.totals.calls}</td>
+                        <td class="stats-header-cell">${mainCat.totals.inbound} min</td>
+                        <td class="stats-header-cell">${mainCat.totals.outbound} min</td>
                         <td class="stats-header-cell">${mainCategoryTotal} min</td>
                         <td class="stats-header-cell stats-percentage">${mainCategoryPercentage}%</td>
                     `;
                 } else {
                     headerRow.innerHTML = `
-                        <td class="stats-header-cell">${mainCategory.name}</td>
-                        <td class="stats-header-cell">${mainCategoryCallCount}</td>
-                        <td class="stats-header-cell">${formatTime(mainCategoryInbound, true)}</td>
-                        <td class="stats-header-cell">${formatTime(mainCategoryOutbound, true)}</td>
+                        <td class="stats-header-cell">${mainCat.name}</td>
+                        <td class="stats-header-cell">${mainCat.totals.calls}</td>
+                        <td class="stats-header-cell">${formatTime(mainCat.totals.inbound, true)}</td>
+                        <td class="stats-header-cell">${formatTime(mainCat.totals.outbound, true)}</td>
                         <td class="stats-header-cell">${formatTime(mainCategoryTotal, true)}</td>
                         <td class="stats-header-cell">${formatTime(mainCategoryAvg, false)}</td>
                         <td class="stats-header-cell stats-percentage">${mainCategoryPercentage}%</td>
@@ -276,30 +308,29 @@ function updateStatsTable(tableBodyId, isToday) {
                 tableBody.appendChild(headerRow);
                 
                 // Add subcategory rows
-                Object.keys(subcategories).forEach(subKey => {
-                    const categoryKey = `${mainKey}_${subKey}`;
-                    const stats = getStatsForCategory(categoryKey, isToday);
+                Object.keys(mainCat.subcategories).forEach(subKey => {
+                    const subcat = mainCat.subcategories[subKey];
                     
-                    if (stats.calls > 0) {
-                        const totalTime = stats.inbound + stats.outbound;
-                        const avgTime = stats.calls > 0 ? Math.round(totalTime / stats.calls) : 0;
+                    if (subcat.stats.calls > 0) {
+                        const totalTime = subcat.stats.inbound + subcat.stats.outbound;
+                        const avgTime = subcat.stats.calls > 0 ? Math.round(totalTime / subcat.stats.calls) : 0;
                         const row = document.createElement('tr');
                         
                         if (isToday) {
                             row.innerHTML = `
-                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
-                                <td><span class="stats-number">${stats.calls}</span></td>
-                                <td><span class="stats-number">${stats.inbound} min</span></td>
-                                <td><span class="stats-number">${stats.outbound} min</span></td>
+                                <td style="padding-left: 30px;">${subcat.name}</td>
+                                <td><span class="stats-number">${subcat.stats.calls}</span></td>
+                                <td><span class="stats-number">${subcat.stats.inbound} min</span></td>
+                                <td><span class="stats-number">${subcat.stats.outbound} min</span></td>
                                 <td><span class="stats-number">${totalTime} min</span></td>
                                 <td></td>
                             `;
                         } else {
                             row.innerHTML = `
-                                <td style="padding-left: 30px;">${subcategories[subKey].name}</td>
-                                <td><span class="stats-number">${stats.calls}</span></td>
-                                <td><span class="stats-number">${formatTime(stats.inbound, true)}</span></td>
-                                <td><span class="stats-number">${formatTime(stats.outbound, true)}</span></td>
+                                <td style="padding-left: 30px;">${subcat.name}</td>
+                                <td><span class="stats-number">${subcat.stats.calls}</span></td>
+                                <td><span class="stats-number">${formatTime(subcat.stats.inbound, true)}</span></td>
+                                <td><span class="stats-number">${formatTime(subcat.stats.outbound, true)}</span></td>
                                 <td><span class="stats-number">${formatTime(totalTime, true)}</span></td>
                                 <td><span class="stats-number">${formatTime(avgTime, false)}</span></td>
                                 <td></td>
@@ -314,34 +345,9 @@ function updateStatsTable(tableBodyId, isToday) {
     
     if (!hasCategories) {
         const colspan = isToday ? '6' : '7';
-        tableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: var(--text-secondary);">No subcategories yet. Add subcategories to start tracking.</td></tr>`;
+        tableBody.innerHTML = createEmptyState('No subcategories yet. Add subcategories to start tracking.', colspan);
     }
 }
-
-// Add CSS for stats header cells
-const style = document.createElement('style');
-style.textContent = `
-    .stats-header-row {
-        border-top: 3px solid var(--border-color);
-    }
-    .stats-header-cell {
-        background: var(--section-bg);
-        font-weight: 700;
-        padding: 14px 10px;
-        border-top: 3px solid var(--border-color);
-        color: var(--text-primary);
-    }
-    .stats-header-cell:first-child {
-        color: var(--button-bg);
-        font-size: 14px;
-    }
-    .stats-header-cell.stats-percentage {
-        text-align: center;
-        color: var(--button-bg);
-        font-size: 14px;
-    }
-`;
-document.head.appendChild(style);
 
 function exportStats(type) {
     const isToday = type === 'today';
@@ -362,21 +368,7 @@ function exportStats(type) {
         timeWindow = `${formatDateTime(firstCall)} - ${formatDateTime(lastCall)}`;
     }
     
-    let totalCalls = 0;
-    const mainCategoryCalls = {};
-    
-    Object.keys(categories).forEach(mainKey => {
-        const subcategories = categories[mainKey].subcategories;
-        mainCategoryCalls[mainKey] = 0;
-        
-        Object.keys(subcategories).forEach(subKey => {
-            const categoryKey = `${mainKey}_${subKey}`;
-            const stats = getStatsForCategory(categoryKey, isToday);
-            totalCalls += stats.calls;
-            mainCategoryCalls[mainKey] += stats.calls;
-        });
-    });
-    
+    const { totalCalls, mainCategoryCalls, categoryDetails } = calculateCategoryStats(isToday);
     const normalizeText = (text) => text.replace(/ä/g, 'a').replace(/Ä/g, 'A').replace(/ö/g, 'o').replace(/Ö/g, 'O');
     
     let csv = `"Call Statistics Report - ${isToday ? 'Today' : 'All-Time'}"\n`;
@@ -387,25 +379,23 @@ function exportStats(type) {
         ? 'Main Category,Subcategory,Calls,Percentage,Inbound (min),Outbound (min),Total (min)\n'
         : 'Main Category,Subcategory,Calls,Percentage,Inbound,Outbound,Total,Avg per Call\n';
     
-    Object.keys(categories).forEach(mainKey => {
-        const mainCategory = categories[mainKey];
-        const subcategories = mainCategory.subcategories;
+    Object.keys(categoryDetails).forEach(mainKey => {
+        const mainCat = categoryDetails[mainKey];
         const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
-        const normalizedMainCat = normalizeText(mainCategory.name);
+        const normalizedMainCat = normalizeText(mainCat.name);
         
         csv += `"${normalizedMainCat}","",,"${mainCategoryPercentage}%",,,\n`;
         
-        Object.keys(subcategories).forEach(subKey => {
-            const categoryKey = `${mainKey}_${subKey}`;
-            const stats = getStatsForCategory(categoryKey, isToday);
-            const totalTime = stats.inbound + stats.outbound;
-            const avgTime = stats.calls > 0 ? Math.round(totalTime / stats.calls) : 0;
-            const normalizedSubCat = normalizeText(subcategories[subKey].name);
+        Object.keys(mainCat.subcategories).forEach(subKey => {
+            const subcat = mainCat.subcategories[subKey];
+            const totalTime = subcat.stats.inbound + subcat.stats.outbound;
+            const avgTime = subcat.stats.calls > 0 ? Math.round(totalTime / subcat.stats.calls) : 0;
+            const normalizedSubCat = normalizeText(subcat.name);
             
             if (isToday) {
-                csv += `"","${normalizedSubCat}",${stats.calls},,${stats.inbound},${stats.outbound},${totalTime}\n`;
+                csv += `"","${normalizedSubCat}",${subcat.stats.calls},,${subcat.stats.inbound},${subcat.stats.outbound},${totalTime}\n`;
             } else {
-                csv += `"","${normalizedSubCat}",${stats.calls},,"${formatTime(stats.inbound, true)}","${formatTime(stats.outbound, true)}","${formatTime(totalTime, true)}","${formatTime(avgTime, false)}"\n`;
+                csv += `"","${normalizedSubCat}",${subcat.stats.calls},,"${formatTime(subcat.stats.inbound, true)}","${formatTime(subcat.stats.outbound, true)}","${formatTime(totalTime, true)}","${formatTime(avgTime, false)}"\n`;
             }
         });
     });
@@ -506,7 +496,7 @@ function renderCustomFieldsList() {
     listContainer.innerHTML = '';
     
     if (customFields.length === 0) {
-        listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">No custom fields yet. Add one below!</div>';
+        listContainer.appendChild(createEmptyState('No custom fields yet. Add one below!'));
         return;
     }
     
@@ -981,13 +971,13 @@ function renderCategoryList() {
     listContainer.innerHTML = '';
     
     if (!selectedMainKey) {
-        listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Please select a main category above to view and manage its subcategories.</div>';
+        listContainer.appendChild(createEmptyState('Please select a main category above to view and manage its subcategories.'));
         return;
     }
     
     const mainCategory = categories[selectedMainKey];
     if (!mainCategory) {
-        listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Selected category not found.</div>';
+        listContainer.appendChild(createEmptyState('Selected category not found.'));
         return;
     }
     
@@ -1008,12 +998,8 @@ function renderCategoryList() {
     const subcategories = mainCategory.subcategories;
     
     if (Object.keys(subcategories).length === 0) {
-        const emptyMsg = document.createElement('div');
-        emptyMsg.style.padding = '20px';
-        emptyMsg.style.textAlign = 'center';
-        emptyMsg.style.color = 'var(--text-secondary)';
+        const emptyMsg = createEmptyState('No subcategories yet. Add one below!');
         emptyMsg.style.marginTop = '10px';
-        emptyMsg.textContent = 'No subcategories yet. Add one below!';
         listContainer.appendChild(emptyMsg);
     } else {
         Object.keys(subcategories).forEach(subKey => {
@@ -1045,7 +1031,7 @@ function addNewMainCategory() {
         return;
     }
     
-    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    const key = generateKey(name);
     
     if (categories[key]) {
         alert('A main category with this name already exists!');
@@ -1077,7 +1063,7 @@ function addNewSubcategory() {
         return;
     }
     
-    const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    const key = generateKey(name);
     
     if (categories[mainKey].subcategories[key]) {
         alert('A subcategory with this name already exists in this main category!');
