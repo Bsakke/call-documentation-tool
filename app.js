@@ -300,7 +300,37 @@ function getDefaultCategories() {
 function initCategories() {
     const savedCategories = localStorage.getItem('callCategories');
     if (savedCategories) {
-        categories = JSON.parse(savedCategories);
+        try {
+            const parsed = JSON.parse(savedCategories);
+            // Ensure parsed is a plain object with expected shape (not an array)
+            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                const keys = Object.keys(parsed);
+                // Detect empty or invalid structure (no readable names)
+                const hasValid = keys.some(k => parsed[k] && typeof parsed[k].name === 'string' && parsed[k].name.trim());
+                if (keys.length === 0 || !hasValid) {
+                    console.warn('Saved categories empty or invalid, restoring defaults.');
+                    categories = getDefaultCategories();
+                    saveCategories();
+                    showNotification('Saved categories were invalid. Restored default categories.');
+                } else {
+                    // Merge defaults so the three baseline categories always exist
+                    const defaults = getDefaultCategories();
+                    Object.keys(defaults).forEach(dk => {
+                        if (!parsed[dk]) parsed[dk] = defaults[dk];
+                    });
+                    categories = parsed;
+                    // Persist merged defaults back to storage
+                    saveCategories();
+                }
+            } else {
+                throw new Error('Invalid categories format');
+            }
+        } catch (e) {
+            console.warn('Failed to parse saved categories, resetting to defaults.', e);
+            categories = getDefaultCategories();
+            saveCategories();
+            showNotification('Saved categories were corrupted. Restored default categories.');
+        }
     } else {
         categories = getDefaultCategories();
         saveCategories();
@@ -317,16 +347,41 @@ function saveCategories() {
 
 function populateMainCategoryDropdown() {
     const select = document.getElementById('mainCategory');
+    if (!select) return;
     const currentValue = select.value;
     select.innerHTML = '<option value="">-- Select Main Category --</option>';
-    
-    Object.keys(categories).forEach(key => {
+
+    const keys = Object.keys(categories || {});
+    // Sort category keys by their display name for a predictable order
+    keys.sort((a, b) => (categories[a].name || a).localeCompare(categories[b].name || b));
+    // Debugging: log available categories so we can troubleshoot empty dropdown issues
+    console.debug('populateMainCategoryDropdown — keys:', keys, 'categories:', categories);
+    if (keys.length === 0) {
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = '-- No Categories Available --';
+        emptyOption.disabled = true;
+        select.appendChild(emptyOption);
+        console.warn('No categories available to populate mainCategory dropdown.');
+        showNotification('No categories available. Please add categories via Manage Categories.');
+        return;
+    }
+    if (keys.length === 0) {
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = '-- No Categories Available --';
+        emptyOption.disabled = true;
+        select.appendChild(emptyOption);
+        return;
+    }
+    keys.forEach(key => {
         const option = document.createElement('option');
         option.value = key;
-        option.textContent = categories[key].name;
+        option.textContent = categories[key].name || key;
         select.appendChild(option);
     });
-    
+
+    // If previous selection still valid, re-select it, otherwise leave placeholder
     if (currentValue && categories[currentValue]) {
         select.value = currentValue;
         updateSubcategoryDropdown();
@@ -1401,7 +1456,9 @@ let notesDragOffsetY = 0;
 function initNotesDragging() {
     const toggleBtn = document.getElementById('notesToggleBtn');
     const sidebar = document.getElementById('notesSidebar');
-    
+    // If the old notes sidebar has been removed, skip attaching listeners
+    if (!toggleBtn || !sidebar) return;
+
     toggleBtn.addEventListener('mousedown', function(e) {
         const isHidden = sidebar.classList.contains('hidden');
         if (!isHidden) {
@@ -1477,7 +1534,9 @@ function initNotesResizing() {
     const bottomHandle = document.getElementById('notesResizeBottom');
     const cornerHandle = document.getElementById('notesResizeCorner');
     const sidebar = document.getElementById('notesSidebar');
-    
+    // If sidebar doesn't exist (we removed it), don't attach resize listeners
+    if (!rightHandle || !bottomHandle || !cornerHandle || !sidebar) return;
+
     // Right edge resize
     rightHandle.addEventListener('mousedown', function(e) {
         isResizingNotes = true;
@@ -2193,6 +2252,12 @@ function addNewMainCategory() {
     showNotification('Main category added!');
     document.getElementById('newMainCategoryName').value = '';
     document.getElementById('viewMainCategory').value = key;
+    // Also select the new category in the main dropdown so it's immediately available
+    const mainSelect = document.getElementById('mainCategory');
+    if (mainSelect) {
+        mainSelect.value = key;
+        updateSubcategoryDropdown();
+    }
     renderCategoryList();
 }
 
@@ -2318,6 +2383,11 @@ window.onload = function() {
     initNotesDragging();
     initNotesResizing();
     initCategories();
+    // Ensure main category dropdown is populated (extra safeguard)
+    setTimeout(() => {
+        populateMainCategoryDropdown();
+        console.debug('After initCategories, categories:', categories);
+    }, 50);
     loadCustomFields();
     addTimeEntry('inbound');
     addTimeEntry('outbound');
