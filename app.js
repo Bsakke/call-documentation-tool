@@ -1,3 +1,144 @@
+// ===== FLOATING PERSONAL NOTES =====
+let floatingNotes = [];
+
+function loadFloatingNotes() {
+    const saved = localStorage.getItem('floatingNotes');
+    if (saved) {
+        try {
+            floatingNotes = JSON.parse(saved);
+        } catch (e) {
+            floatingNotes = [];
+        }
+    } else {
+        floatingNotes = [];
+    }
+    renderFloatingNotes();
+}
+
+function saveFloatingNotes() {
+    localStorage.setItem('floatingNotes', JSON.stringify(floatingNotes));
+}
+
+function addFloatingNote() {
+    const id = Date.now();
+    const note = {
+        id,
+        content: '',
+        left: 120 + Math.floor(Math.random()*100),
+        top: 120 + Math.floor(Math.random()*100),
+        width: 320,
+        height: 180
+    };
+    floatingNotes.push(note);
+    saveFloatingNotes();
+    renderFloatingNotes();
+}
+
+function deleteFloatingNote(id) {
+    if (confirm('Delete this note?')) {
+        floatingNotes = floatingNotes.filter(n => n.id !== id);
+        saveFloatingNotes();
+        renderFloatingNotes();
+    }
+}
+
+function updateFloatingNoteContent(id, content) {
+    const note = floatingNotes.find(n => n.id === id);
+    if (note) {
+        note.content = content;
+        saveFloatingNotes();
+    }
+}
+
+function renderFloatingNotes() {
+    const container = document.getElementById('floatingNotesContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    floatingNotes.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'floating-note';
+        noteDiv.style.left = note.left + 'px';
+        noteDiv.style.top = note.top + 'px';
+        noteDiv.style.width = note.width + 'px';
+        noteDiv.style.height = note.height + 'px';
+        noteDiv.setAttribute('data-id', note.id);
+        noteDiv.innerHTML = `
+            <div class="floating-note-header" onmousedown="startDragFloatingNote(event, ${note.id})">
+                Personal Note
+                <button class="floating-note-delete" onclick="deleteFloatingNote(${note.id}); event.stopPropagation();">Delete</button>
+            </div>
+            <textarea class="floating-note-content" placeholder="Write your note here..." oninput="updateFloatingNoteContent(${note.id}, this.value)">${note.content || ''}</textarea>
+            <div class="floating-note-resize" onmousedown="startResizeFloatingNote(event, ${note.id})"></div>
+        `;
+        container.appendChild(noteDiv);
+    });
+}
+
+// Dragging logic
+
+// Dragging logic (floating notes)
+let floatingDragNoteId = null, floatingDragOffsetX = 0, floatingDragOffsetY = 0;
+function startDragFloatingNote(e, id) {
+    floatingDragNoteId = id;
+    const note = floatingNotes.find(n => n.id === id);
+    if (!note) return;
+    const noteDiv = document.querySelector(`.floating-note[data-id='${id}']`);
+    if (noteDiv) noteDiv.classList.add('dragging');
+    floatingDragOffsetX = e.clientX - note.left;
+    floatingDragOffsetY = e.clientY - note.top;
+    document.addEventListener('mousemove', dragFloatingNote);
+    document.addEventListener('mouseup', stopDragFloatingNote);
+    e.preventDefault();
+}
+function dragFloatingNote(e) {
+    if (floatingDragNoteId === null) return;
+    const note = floatingNotes.find(n => n.id === floatingDragNoteId);
+    if (!note) return;
+    note.left = Math.max(0, Math.min(window.innerWidth - 120, e.clientX - floatingDragOffsetX));
+    note.top = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - floatingDragOffsetY));
+    saveFloatingNotes();
+    renderFloatingNotes();
+}
+function stopDragFloatingNote() {
+    const noteDiv = document.querySelector(`.floating-note[data-id='${floatingDragNoteId}']`);
+    if (noteDiv) noteDiv.classList.remove('dragging');
+    floatingDragNoteId = null;
+    document.removeEventListener('mousemove', dragFloatingNote);
+    document.removeEventListener('mouseup', stopDragFloatingNote);
+}
+
+// Resizing logic (floating notes)
+let floatingResizeNoteId = null, floatingResizeStartX = 0, floatingResizeStartY = 0, floatingStartW = 0, floatingStartH = 0;
+function startResizeFloatingNote(e, id) {
+    floatingResizeNoteId = id;
+    const note = floatingNotes.find(n => n.id === id);
+    if (!note) return;
+    floatingResizeStartX = e.clientX;
+    floatingResizeStartY = e.clientY;
+    floatingStartW = note.width;
+    floatingStartH = note.height;
+    document.addEventListener('mousemove', resizeFloatingNote);
+    document.addEventListener('mouseup', stopResizeFloatingNote);
+    e.preventDefault();
+    e.stopPropagation();
+}
+function resizeFloatingNote(e) {
+    if (floatingResizeNoteId === null) return;
+    const note = floatingNotes.find(n => n.id === floatingResizeNoteId);
+    if (!note) return;
+    note.width = Math.max(220, Math.min(600, floatingStartW + (e.clientX - floatingResizeStartX)));
+    note.height = Math.max(100, Math.min(600, floatingStartH + (e.clientY - floatingResizeStartY)));
+    saveFloatingNotes();
+    renderFloatingNotes();
+}
+function stopResizeFloatingNote() {
+    floatingResizeNoteId = null;
+    document.removeEventListener('mousemove', resizeFloatingNote);
+    document.removeEventListener('mouseup', stopResizeFloatingNote);
+}
+
+// Load floating notes on page load
+window.addEventListener('DOMContentLoaded', loadFloatingNotes);
 // Deck 2.0 - Main Application Logic
 
 // ===== STATE MANAGEMENT =====
@@ -11,6 +152,12 @@ let undoTimeout = null;
 let undoCountdownInterval = null;
 let inboundCount = 0;
 let outboundCount = 0;
+
+// Stopwatch state
+let stopwatchInterval = null;
+let stopwatchElapsed = 0; // in seconds
+let stopwatchRunning = false;
+let stopwatchHistory = [];
 
 // ===== UTILITY FUNCTIONS =====
 
@@ -129,6 +276,8 @@ function createEmptyState(message, colspan = null) {
     return div;
 }
 
+let currentFocusedIndex = -1;
+
 // ===== CATEGORY MANAGEMENT =====
 
 function getDefaultCategories() {
@@ -186,27 +335,212 @@ function populateMainCategoryDropdown() {
 
 function updateSubcategoryDropdown() {
     const mainCategoryKey = document.getElementById('mainCategory').value;
-    const subSelect = document.getElementById('subCategory');
-    const currentValue = subSelect.value;
+    const subInput = document.getElementById('subCategoryInput');
     
-    subSelect.innerHTML = '<option value="">-- Select Subcategory --</option>';
-    
-    if (mainCategoryKey && categories[mainCategoryKey]) {
-        const subcategories = categories[mainCategoryKey].subcategories;
-        Object.keys(subcategories).forEach(key => {
-            const option = document.createElement('option');
-            option.value = key;
-            option.textContent = subcategories[key].name;
-            subSelect.appendChild(option);
-        });
-        
-        if (currentValue && subcategories[currentValue]) {
-            subSelect.value = currentValue;
-        }
+    if (subInput) {
+        // Clear input when main category changes
+        subInput.value = '';
     }
     
     updateCustomerFields();
     generateTemplate();
+    hideSubcategoryDropdown();
+}
+
+function handleSubcategoryInput() {
+    currentFocusedIndex = -1; // Reset focus when typing
+    showSubcategoryDropdown();
+    generateTemplate();
+}
+
+function handleSubcategoryKeydown(event) {
+    const dropdown = document.getElementById('subCategoryDropdown');
+    
+    if (!dropdown || dropdown.style.display === 'none') {
+        return;
+    }
+    
+    const items = dropdown.querySelectorAll('.custom-dropdown-item');
+    
+    if (items.length === 0) {
+        return;
+    }
+    
+    // Handle Tab key
+    if (event.key === 'Tab') {
+        event.preventDefault();
+        
+        if (event.shiftKey) {
+            // Shift+Tab: cycle backwards
+            currentFocusedIndex--;
+            if (currentFocusedIndex < 0) {
+                currentFocusedIndex = items.length - 1;
+            }
+        } else {
+            // Tab: cycle forwards
+            currentFocusedIndex++;
+            if (currentFocusedIndex >= items.length) {
+                currentFocusedIndex = 0;
+            }
+        }
+        
+        // Remove previous focus
+        items.forEach(item => item.classList.remove('focused'));
+        
+        // Add focus to current item
+        if (currentFocusedIndex >= 0 && currentFocusedIndex < items.length) {
+            const focusedItem = items[currentFocusedIndex];
+            focusedItem.classList.add('focused');
+            
+            // Scroll into view if needed
+            focusedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }
+    // Handle Enter key
+    else if (event.key === 'Enter') {
+        event.preventDefault();
+        
+        if (currentFocusedIndex >= 0 && currentFocusedIndex < items.length) {
+            // Select the focused item
+            items[currentFocusedIndex].click();
+        }
+    }
+    // Handle Escape key
+    else if (event.key === 'Escape') {
+        hideSubcategoryDropdown();
+        currentFocusedIndex = -1;
+    }
+    // Handle Arrow Down
+    else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        currentFocusedIndex++;
+        if (currentFocusedIndex >= items.length) {
+            currentFocusedIndex = 0;
+        }
+        
+        items.forEach(item => item.classList.remove('focused'));
+        if (currentFocusedIndex >= 0 && currentFocusedIndex < items.length) {
+            const focusedItem = items[currentFocusedIndex];
+            focusedItem.classList.add('focused');
+            focusedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }
+    // Handle Arrow Up
+    else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        currentFocusedIndex--;
+        if (currentFocusedIndex < 0) {
+            currentFocusedIndex = items.length - 1;
+        }
+        
+        items.forEach(item => item.classList.remove('focused'));
+        if (currentFocusedIndex >= 0 && currentFocusedIndex < items.length) {
+            const focusedItem = items[currentFocusedIndex];
+            focusedItem.classList.add('focused');
+            focusedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }
+}
+
+function showSubcategoryDropdown() {
+    const mainCategoryKey = document.getElementById('mainCategory').value;
+    const subInput = document.getElementById('subCategoryInput');
+    const dropdown = document.getElementById('subCategoryDropdown');
+    
+    if (!dropdown || !mainCategoryKey) {
+        if (dropdown) dropdown.style.display = 'none';
+        return;
+    }
+    
+    const inputValue = subInput.value.toLowerCase().trim();
+    const subcategories = categories[mainCategoryKey]?.subcategories || {};
+    
+    dropdown.innerHTML = '';
+    
+    // Filter subcategories based on input
+    const filtered = Object.keys(subcategories).filter(key => {
+        const name = subcategories[key].name.toLowerCase();
+        return inputValue === '' || name.includes(inputValue);
+    });
+    
+    if (filtered.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'custom-dropdown-empty';
+        emptyDiv.textContent = inputValue ? 'No matching subcategories. Type to create new.' : 'No subcategories yet. Type to create new.';
+        dropdown.appendChild(emptyDiv);
+    } else {
+        filtered.forEach(key => {
+            const item = document.createElement('div');
+            item.className = 'custom-dropdown-item';
+            item.textContent = subcategories[key].name;
+            item.setAttribute('data-key', key);
+            
+            // Highlight if matches current input
+            if (subcategories[key].name.toLowerCase() === inputValue) {
+                item.classList.add('selected');
+            }
+            
+            item.onclick = function() {
+                selectSubcategory(subcategories[key].name, key);
+            };
+            
+            dropdown.appendChild(item);
+        });
+    }
+    
+    dropdown.style.display = 'block';
+}
+
+function toggleSubcategoryDropdown() {
+    const dropdown = document.getElementById('subCategoryDropdown');
+    if (dropdown.style.display === 'none') {
+        showSubcategoryDropdown();
+    } else {
+        hideSubcategoryDropdown();
+    }
+}
+
+function hideSubcategoryDropdown() {
+    const dropdown = document.getElementById('subCategoryDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+        currentFocusedIndex = -1; // Reset focus when closing
+    }
+}
+
+function selectSubcategory(name, key) {
+    const subInput = document.getElementById('subCategoryInput');
+    if (subInput) {
+        subInput.value = name;
+    }
+    hideSubcategoryDropdown();
+    generateTemplate();
+}
+
+function getSubcategoryValue() {
+    const subInput = document.getElementById('subCategoryInput');
+    return subInput ? subInput.value.trim() : '';
+}
+
+function getSubcategoryKeyFromName(mainCategoryKey, subcategoryName) {
+    if (!mainCategoryKey || !categories[mainCategoryKey]) return null;
+    
+    const subcategories = categories[mainCategoryKey].subcategories;
+    const normalizedInput = subcategoryName.toLowerCase();
+    
+    // Check for exact name match first
+    for (const key in subcategories) {
+        if (subcategories[key].name.toLowerCase() === normalizedInput) {
+            return key;
+        }
+    }
+    
+    // Check for key match
+    if (subcategories[subcategoryName]) {
+        return subcategoryName;
+    }
+    
+    return null;
 }
 
 function updateCustomerFields() {
@@ -269,6 +603,9 @@ function updateStatsTable(tableBodyId, isToday) {
     const { totalCalls, mainCategoryCalls, categoryDetails } = calculateCategoryStats(isToday);
     
     let hasCategories = false;
+    let grandTotalInbound = 0;
+    let grandTotalOutbound = 0;
+    let grandTotalCalls = 0;
     
     // Render categories using pre-calculated stats
     Object.keys(categoryDetails).forEach(mainKey => {
@@ -282,6 +619,11 @@ function updateStatsTable(tableBodyId, isToday) {
             const mainCategoryPercentage = totalCalls > 0 ? ((mainCategoryCalls[mainKey] / totalCalls) * 100).toFixed(1) : 0;
             
             if (mainCat.totals.calls > 0) {
+                // Accumulate grand totals
+                grandTotalInbound += mainCat.totals.inbound;
+                grandTotalOutbound += mainCat.totals.outbound;
+                grandTotalCalls += mainCat.totals.calls;
+                
                 const headerRow = document.createElement('tr');
                 headerRow.className = 'stats-header-row';
                 
@@ -342,6 +684,38 @@ function updateStatsTable(tableBodyId, isToday) {
             }
         }
     });
+    
+    // Add grand total row if there are categories
+    if (hasCategories && grandTotalCalls > 0) {
+        const grandTotal = grandTotalInbound + grandTotalOutbound;
+        const grandAvg = Math.round(grandTotal / grandTotalCalls);
+        const totalRow = document.createElement('tr');
+        totalRow.style.fontWeight = 'bold';
+        totalRow.style.background = 'var(--button-bg)';
+        totalRow.style.color = 'white';
+        
+        if (isToday) {
+            totalRow.innerHTML = `
+                <td>Total</td>
+                <td>${grandTotalCalls}</td>
+                <td>${grandTotalInbound} min</td>
+                <td>${grandTotalOutbound} min</td>
+                <td>${grandTotal} min</td>
+                <td>100.0%</td>
+            `;
+        } else {
+            totalRow.innerHTML = `
+                <td>Total</td>
+                <td>${grandTotalCalls}</td>
+                <td>${formatTime(grandTotalInbound, true)}</td>
+                <td>${formatTime(grandTotalOutbound, true)}</td>
+                <td>${formatTime(grandTotal, true)}</td>
+                <td>${formatTime(grandAvg, false)}</td>
+                <td>100.0%</td>
+            `;
+        }
+        tableBody.appendChild(totalRow);
+    }
     
     if (!hasCategories) {
         const colspan = isToday ? '6' : '7';
@@ -424,11 +798,16 @@ function toggleDarkMode() {
 }
 
 function loadDarkModePreference() {
-    const isDark = localStorage.getItem('darkMode') === 'true';
+    const darkMode = localStorage.getItem('darkMode');
+    // Always default to dark mode
+    const isDark = darkMode !== 'false';
+    
     if (isDark) {
         document.body.classList.add('dark-mode');
         const btn = document.querySelector('.dark-mode-toggle');
         if (btn) btn.textContent = '☀️ Light';
+        // Save the preference
+        localStorage.setItem('darkMode', 'true');
     }
 }
 
@@ -455,6 +834,740 @@ function loadCustomerSectionState() {
     if (isCollapsed) {
         document.getElementById('customerFieldsSection').style.display = 'none';
         document.getElementById('customerSectionToggle').textContent = '▶';
+    }
+}
+
+// ===== STOPWATCH FUNCTIONS =====
+
+function toggleStopwatchSection() {
+    const section = document.getElementById('stopwatchSection');
+    const toggle = document.getElementById('stopwatchSectionToggle');
+    const isCollapsed = section.style.display === 'none';
+    
+    if (isCollapsed) {
+        section.style.display = 'block';
+        toggle.textContent = '▼';
+        localStorage.setItem('stopwatchSectionCollapsed', 'false');
+    } else {
+        section.style.display = 'none';
+        toggle.textContent = '▶';
+        localStorage.setItem('stopwatchSectionCollapsed', 'true');
+    }
+}
+
+function loadStopwatchSectionState() {
+    const isCollapsed = localStorage.getItem('stopwatchSectionCollapsed');
+    // Default to collapsed if not set
+    if (isCollapsed === null || isCollapsed === 'true') {
+        document.getElementById('stopwatchSection').style.display = 'none';
+        document.getElementById('stopwatchSectionToggle').textContent = '▶';
+    } else {
+        document.getElementById('stopwatchSection').style.display = 'block';
+        document.getElementById('stopwatchSectionToggle').textContent = '▼';
+    }
+    
+    // Load history from localStorage
+    const savedHistory = localStorage.getItem('stopwatchHistory');
+    if (savedHistory) {
+        stopwatchHistory = JSON.parse(savedHistory);
+        updateStopwatchHistoryDisplay();
+    }
+}
+
+function formatStopwatchTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function updateStopwatchDisplay() {
+    document.getElementById('stopwatchDisplay').textContent = formatStopwatchTime(stopwatchElapsed);
+}
+
+function startStopwatch() {
+    if (!stopwatchRunning) {
+        stopwatchRunning = true;
+        document.getElementById('stopwatchStartBtn').disabled = true;
+        document.getElementById('stopwatchPauseBtn').disabled = false;
+        
+        stopwatchInterval = setInterval(() => {
+            stopwatchElapsed++;
+            updateStopwatchDisplay();
+        }, 1000);
+    }
+}
+
+function pauseStopwatch() {
+    if (stopwatchRunning) {
+        stopwatchRunning = false;
+        clearInterval(stopwatchInterval);
+        document.getElementById('stopwatchStartBtn').disabled = false;
+        document.getElementById('stopwatchPauseBtn').disabled = true;
+    }
+}
+
+function resetStopwatch() {
+    // Save to history if there's elapsed time and a name
+    if (stopwatchElapsed > 0) {
+        const taskName = document.getElementById('stopwatchName').value.trim() || 'Unnamed Task';
+        const timestamp = new Date().toLocaleString();
+        
+        stopwatchHistory.unshift({
+            name: taskName,
+            duration: stopwatchElapsed,
+            timestamp: timestamp
+        });
+        
+        // Keep only last 20 entries
+        if (stopwatchHistory.length > 20) {
+            stopwatchHistory = stopwatchHistory.slice(0, 20);
+        }
+        
+        localStorage.setItem('stopwatchHistory', JSON.stringify(stopwatchHistory));
+        updateStopwatchHistoryDisplay();
+    }
+    
+    // Reset stopwatch
+    pauseStopwatch();
+    stopwatchElapsed = 0;
+    updateStopwatchDisplay();
+    document.getElementById('stopwatchStartBtn').disabled = false;
+    document.getElementById('stopwatchPauseBtn').disabled = true;
+}
+
+function updateStopwatchHistoryDisplay() {
+    const historyList = document.getElementById('stopwatchHistoryList');
+    
+    if (stopwatchHistory.length === 0) {
+        historyList.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No recorded sessions yet</div>';
+        return;
+    }
+    
+    historyList.innerHTML = stopwatchHistory.map((entry, index) => `
+        <div style="padding: 8px; margin-bottom: 5px; background: var(--card-bg); border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="flex: 1;">
+                <div style="font-weight: 600;">${entry.name}</div>
+                <div style="font-size: 11px; color: var(--text-secondary);">${entry.timestamp}</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-weight: bold; color: var(--button-bg);">${formatStopwatchTime(entry.duration)}</div>
+                <button onclick="deleteStopwatchEntry(${index})" style="background: #f56565; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteStopwatchEntry(index) {
+    if (confirm('Delete this timer entry?')) {
+        stopwatchHistory.splice(index, 1);
+        localStorage.setItem('stopwatchHistory', JSON.stringify(stopwatchHistory));
+        updateStopwatchHistoryDisplay();
+    }
+}
+
+// ===== WEEKLY SCHEDULE =====
+
+let weeklySchedule = {
+    monday: { start: '', end: '' },
+    tuesday: { start: '', end: '' },
+    wednesday: { start: '', end: '' },
+    thursday: { start: '', end: '' },
+    friday: { start: '', end: '' },
+    saturday: { start: '', end: '' },
+    sunday: { start: '', end: '' }
+};
+
+function loadSchedule() {
+    const saved = localStorage.getItem('weeklySchedule');
+    if (saved) {
+        weeklySchedule = JSON.parse(saved);
+    }
+    updateScheduleDisplay();
+}
+
+function updateScheduleDisplay() {
+    const display = document.getElementById('weeklyScheduleDisplay');
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const todayIndex = today === 0 ? 6 : today - 1; // Convert to 0 = Monday
+    
+    display.innerHTML = days.map((day, index) => {
+        const schedule = weeklySchedule[day];
+        const hasSchedule = schedule.start && schedule.end;
+        const isToday = index === todayIndex;
+        
+        // Determine color: green for day off, red for 12:00/12:15 start, default otherwise
+        let textColor;
+        if (!hasSchedule) {
+            textColor = '#68d391'; // Lighter green for day off
+        } else if (schedule.start === '12:00' || schedule.start === '12:15') {
+            textColor = '#f56565'; // Red for late shifts
+        } else {
+            textColor = 'var(--text-primary)'; // Default color
+        }
+        
+        // Use the same color for day name if not today, otherwise use button color
+        const dayColor = isToday ? 'var(--button-bg)' : textColor;
+        
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-bottom: 4px; background: var(--section-bg); border-radius: 4px; border-left: 3px solid ${isToday ? 'var(--button-bg)' : 'transparent'};">
+                <span style="font-weight: ${isToday ? '600' : '400'}; color: ${dayColor};">${dayNames[index]}</span>
+                <span style="color: ${textColor}; font-size: 14px;">
+                    ${hasSchedule ? `${schedule.start} - ${schedule.end}` : 'Day off'}
+                </span>
+            </div>
+        `;
+    }).join('');
+}
+
+function openScheduleManager() {
+    const modal = document.getElementById('scheduleModal');
+    const editList = document.getElementById('scheduleEditList');
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    
+    // Specific start time options
+    const startTimeOptions = ['07:45', '08:00', '08:15', '08:30', '08:45', '09:00', '10:00', '11:00', '12:00', '12:15'];
+    
+    // Generate end time options (all day with 15-minute increments)
+    const endTimeOptions = [];
+    for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 15) {
+            const hour = String(h).padStart(2, '0');
+            const minute = String(m).padStart(2, '0');
+            endTimeOptions.push(`${hour}:${minute}`);
+        }
+    }
+    
+    editList.innerHTML = days.map((day, index) => {
+        const startOptions = startTimeOptions.map(time => 
+            `<option value="${time}" ${weeklySchedule[day].start === time ? 'selected' : ''}>${time}</option>`
+        ).join('');
+        
+        const endOptions = endTimeOptions.map(time => 
+            `<option value="${time}" ${weeklySchedule[day].end === time ? 'selected' : ''}>${time}</option>`
+        ).join('');
+        
+        return `
+            <div style="margin-bottom: 15px; padding: 15px; background: var(--section-bg); border-radius: 6px;">
+                <label style="font-weight: 600; display: block; margin-bottom: 10px; color: var(--text-primary);">${dayNames[index]}</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Start Time</label>
+                        <select id="schedule_${day}_start" onchange="autoCalculateEndTime('${day}')" 
+                                style="width: 100%; padding: 8px; border: 2px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-primary);">
+                            <option value="">-- Off --</option>
+                            ${startOptions}
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">
+                            End Time 
+                            <span style="font-size: 10px; font-style: italic;">(auto +8h)</span>
+                        </label>
+                        <select id="schedule_${day}_end" 
+                                style="width: 100%; padding: 8px; border: 2px solid var(--border-color); border-radius: 6px; background: var(--input-bg); color: var(--text-primary);">
+                            <option value="">-- Off --</option>
+                            ${endOptions}
+                        </select>
+                    </div>
+                    <button onclick="clearDaySchedule('${day}')" style="background: #f56565; color: white; padding: 8px 12px; margin-top: 20px;">Clear</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    modal.style.display = 'block';
+}
+
+function autoCalculateEndTime(day) {
+    const startInput = document.getElementById(`schedule_${day}_start`);
+    const endInput = document.getElementById(`schedule_${day}_end`);
+    
+    if (startInput.value) {
+        // Calculate end time (start + 8 hours)
+        const [hours, minutes] = startInput.value.split(':').map(Number);
+        const endHours = (hours + 8) % 24;
+        const endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+        endInput.value = endTime;
+    } else {
+        endInput.value = '';
+    }
+}
+
+function clearDaySchedule(day) {
+    document.getElementById(`schedule_${day}_start`).value = '';
+    document.getElementById(`schedule_${day}_end`).value = '';
+}
+
+function saveSchedule() {
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    
+    days.forEach(day => {
+        const start = document.getElementById(`schedule_${day}_start`).value;
+        const end = document.getElementById(`schedule_${day}_end`).value;
+        weeklySchedule[day] = { start, end };
+    });
+    
+    localStorage.setItem('weeklySchedule', JSON.stringify(weeklySchedule));
+    updateScheduleDisplay();
+    closeScheduleManager();
+    showNotification('Schedule saved successfully!');
+}
+
+function closeScheduleManager() {
+    document.getElementById('scheduleModal').style.display = 'none';
+}
+
+function toggleScheduleSidebar() {
+    // Don't toggle if we just finished dragging
+    if (scheduleHasMoved) {
+        scheduleHasMoved = false;
+        return;
+    }
+    
+    const sidebar = document.getElementById('scheduleSidebar');
+    const handle = document.getElementById('scheduleToggleIcon');
+    if (!sidebar || !handle) return;
+    
+    const isHidden = sidebar.classList.contains('hidden');
+    
+    if (isHidden) {
+        sidebar.classList.remove('hidden');
+        handle.textContent = '▲';
+        localStorage.setItem('scheduleSidebarHidden', 'false');
+    } else {
+        sidebar.classList.add('hidden');
+        handle.textContent = '▼';
+        localStorage.setItem('scheduleSidebarHidden', 'true');
+    }
+}
+
+function loadScheduleSidebarState() {
+    const isHidden = localStorage.getItem('scheduleSidebarHidden') === 'true';
+    const handle = document.getElementById('scheduleToggleIcon');
+    const sidebar = document.getElementById('scheduleSidebar');
+    
+    if (!handle || !sidebar) return;
+    
+    if (isHidden) {
+        sidebar.classList.add('hidden');
+        handle.textContent = '▼';
+    } else {
+        sidebar.classList.remove('hidden');
+        handle.textContent = '▲';
+    }
+    
+    // Load saved position or set default
+    const savedPosition = localStorage.getItem('schedulePosition');
+    if (savedPosition) {
+        const { left, top } = JSON.parse(savedPosition);
+        updateSchedulePosition(left, top);
+    } else {
+        // Set default position
+        // Use setTimeout to ensure window dimensions are available
+        setTimeout(() => {
+            updateSchedulePosition(20, 60);
+        }, 0);
+    }
+}
+
+// ===== SCHEDULE DRAGGING =====
+
+let isDraggingSchedule = false;
+let scheduleHasMoved = false;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
+function initScheduleDragging() {
+    const toggleBtn = document.getElementById('scheduleToggleBtn');
+    const sidebar = document.getElementById('scheduleSidebar');
+    
+    toggleBtn.addEventListener('mousedown', function(e) {
+        const isHidden = sidebar.classList.contains('hidden');
+        if (!isHidden) {
+            isDraggingSchedule = true;
+            scheduleHasMoved = false;
+            sidebar.classList.add('dragging');
+            
+            // Get current position from style or default
+            const currentLeft = parseInt(sidebar.style.left) || 20;
+            const currentTop = parseInt(sidebar.style.top) || 20;
+            
+            // Calculate offset from current position
+            dragOffsetX = e.clientX - currentLeft;
+            dragOffsetY = e.clientY - currentTop;
+            
+            toggleBtn.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isDraggingSchedule) {
+            scheduleHasMoved = true;
+            const newLeft = e.clientX - dragOffsetX;
+            const newTop = e.clientY - dragOffsetY;
+            updateSchedulePosition(newLeft, newTop);
+        }
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isDraggingSchedule) {
+            isDraggingSchedule = false;
+            const sidebar = document.getElementById('scheduleSidebar');
+            sidebar.classList.remove('dragging');
+            const toggleBtn = document.getElementById('scheduleToggleBtn');
+            toggleBtn.style.cursor = 'pointer';
+            
+            // Save position
+            localStorage.setItem('schedulePosition', JSON.stringify({ 
+                left: parseInt(sidebar.style.left) || 20, 
+                top: parseInt(sidebar.style.top) || 20
+            }));
+        }
+    });
+}
+
+function updateSchedulePosition(left, top) {
+    const sidebar = document.getElementById('scheduleSidebar');
+    
+    // Constrain to viewport
+    const maxLeft = window.innerWidth - 280;
+    const maxTop = window.innerHeight - 100;
+    
+    left = Math.max(20, Math.min(left, maxLeft));
+    top = Math.max(20, Math.min(top, maxTop));
+    
+    // Update position
+    sidebar.style.left = left + 'px';
+    sidebar.style.top = top + 'px';
+}
+
+// ===== PERSONAL NOTES =====
+
+function toggleNotesSidebar() {
+    // Don't toggle if we just finished dragging
+    if (notesHasMoved) {
+        notesHasMoved = false;
+        return;
+    }
+    
+    const sidebar = document.getElementById('notesSidebar');
+    const handle = document.getElementById('notesToggleIcon');
+    if (!sidebar || !handle) return;
+    
+    const isHidden = sidebar.classList.contains('hidden');
+    
+    if (isHidden) {
+        sidebar.classList.remove('hidden');
+        handle.textContent = '▲';
+        localStorage.setItem('notesSidebarHidden', 'false');
+    } else {
+        sidebar.classList.add('hidden');
+        handle.textContent = '▼';
+        localStorage.setItem('notesSidebarHidden', 'true');
+    }
+}
+
+function loadNotesSidebarState() {
+    const isHidden = localStorage.getItem('notesSidebarHidden') === 'true';
+    const handle = document.getElementById('notesToggleIcon');
+    const sidebar = document.getElementById('notesSidebar');
+    
+    if (!handle || !sidebar) return;
+    
+    if (isHidden) {
+        sidebar.classList.add('hidden');
+        handle.textContent = '▼';
+    } else {
+        sidebar.classList.remove('hidden');
+        handle.textContent = '▲';
+    }
+    
+    // Load saved position or set default
+    const savedPosition = localStorage.getItem('notesPosition');
+    if (savedPosition) {
+        const { left, top } = JSON.parse(savedPosition);
+        updateNotesPosition(left, top);
+    } else {
+        // Set default position (right side of screen)
+        // Use setTimeout to ensure window dimensions are available
+        setTimeout(() => {
+            const defaultLeft = Math.max(20, (window.innerWidth || 1200) - 320);
+            updateNotesPosition(defaultLeft, 60);
+        }, 0);
+    }
+    
+    // Load saved notes
+    const savedNotes = localStorage.getItem('personalNotes');
+    if (savedNotes) {
+        document.getElementById('personalNotesArea').value = savedNotes;
+    }
+    
+    // Load saved size
+    loadNotesSavedSize();
+    loadPersonalNotes(); // Load existing notes on init
+}
+
+// Personal Notes Management
+let personalNotesData = [];
+
+function loadPersonalNotes() {
+    const saved = localStorage.getItem('personalNotes');
+    if (saved) {
+        try {
+            personalNotesData = JSON.parse(saved);
+        } catch (e) {
+            // If old format (single string), convert to new format
+            personalNotesData = saved ? [{ id: Date.now(), content: saved }] : [];
+        }
+    } else {
+        personalNotesData = [];
+    }
+    renderNotes();
+}
+
+function savePersonalNotes() {
+    localStorage.setItem('personalNotes', JSON.stringify(personalNotesData));
+}
+
+function renderNotes() {
+    const container = document.getElementById('notesListContainer');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (personalNotesData.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px; font-style: italic;">No notes yet. Click "+ Add Note" to create one.</div>';
+        return;
+    }
+    
+    personalNotesData.forEach(note => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-item';
+        noteDiv.innerHTML = `
+            <button class="note-delete-btn" onclick="deleteNote(${note.id})" title="Delete this note">Delete</button>
+            <textarea 
+                placeholder="Write your note here..."
+                oninput="updateNoteContent(${note.id}, this.value)"
+            >${note.content || ''}</textarea>
+        `;
+        container.appendChild(noteDiv);
+    });
+}
+
+function addNewNote() {
+    const newNote = {
+        id: Date.now(),
+        content: ''
+    };
+    personalNotesData.push(newNote);
+    savePersonalNotes();
+    renderNotes();
+    
+    // Focus the new note's textarea
+    setTimeout(() => {
+        const textareas = document.querySelectorAll('.note-item textarea');
+        if (textareas.length > 0) {
+            textareas[textareas.length - 1].focus();
+        }
+    }, 50);
+}
+
+function updateNoteContent(id, content) {
+    const note = personalNotesData.find(n => n.id === id);
+    if (note) {
+        note.content = content;
+        savePersonalNotes();
+    }
+}
+
+function deleteNote(id) {
+    if (confirm('Are you sure you want to delete this note?')) {
+        personalNotesData = personalNotesData.filter(n => n.id !== id);
+        savePersonalNotes();
+        renderNotes();
+    }
+}
+
+let isDraggingNotes = false;
+let notesHasMoved = false;
+let notesDragOffsetX = 0;
+let notesDragOffsetY = 0;
+
+function initNotesDragging() {
+    const toggleBtn = document.getElementById('notesToggleBtn');
+    const sidebar = document.getElementById('notesSidebar');
+    
+    toggleBtn.addEventListener('mousedown', function(e) {
+        const isHidden = sidebar.classList.contains('hidden');
+        if (!isHidden) {
+            isDraggingNotes = true;
+            notesHasMoved = false;
+            sidebar.classList.add('dragging');
+            
+            // Get current position from style or default
+            const currentLeft = parseInt(sidebar.style.left) || 20;
+            const currentTop = parseInt(sidebar.style.top) || 20;
+            
+            // Calculate offset from current position
+            notesDragOffsetX = e.clientX - currentLeft;
+            notesDragOffsetY = e.clientY - currentTop;
+            
+            toggleBtn.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isDraggingNotes) {
+            notesHasMoved = true;
+            const newLeft = e.clientX - notesDragOffsetX;
+            const newTop = e.clientY - notesDragOffsetY;
+            updateNotesPosition(newLeft, newTop);
+        }
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isDraggingNotes) {
+            isDraggingNotes = false;
+            const sidebar = document.getElementById('notesSidebar');
+            sidebar.classList.remove('dragging');
+            const toggleBtn = document.getElementById('notesToggleBtn');
+            toggleBtn.style.cursor = 'pointer';
+            
+            // Save position
+            localStorage.setItem('notesPosition', JSON.stringify({ 
+                left: parseInt(sidebar.style.left) || 20, 
+                top: parseInt(sidebar.style.top) || 20
+            }));
+        }
+    });
+}
+
+function updateNotesPosition(left, top) {
+    const sidebar = document.getElementById('notesSidebar');
+    
+    // Constrain to viewport
+    const maxLeft = window.innerWidth - 280;
+    const maxTop = window.innerHeight - 100;
+    
+    left = Math.max(20, Math.min(left, maxLeft));
+    top = Math.max(20, Math.min(top, maxTop));
+    
+    // Update position
+    sidebar.style.left = left + 'px';
+    sidebar.style.top = top + 'px';
+}
+
+// ===== NOTES RESIZING =====
+
+let isResizingNotes = false;
+let resizeDirection = '';
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartWidth = 0;
+let resizeStartHeight = 0;
+
+function initNotesResizing() {
+    const rightHandle = document.getElementById('notesResizeRight');
+    const bottomHandle = document.getElementById('notesResizeBottom');
+    const cornerHandle = document.getElementById('notesResizeCorner');
+    const sidebar = document.getElementById('notesSidebar');
+    
+    // Right edge resize
+    rightHandle.addEventListener('mousedown', function(e) {
+        isResizingNotes = true;
+        resizeDirection = 'right';
+        resizeStartX = e.clientX;
+        resizeStartWidth = sidebar.offsetWidth;
+        sidebar.classList.add('resizing');
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    
+    // Bottom edge resize
+    bottomHandle.addEventListener('mousedown', function(e) {
+        isResizingNotes = true;
+        resizeDirection = 'bottom';
+        resizeStartY = e.clientY;
+        const content = document.getElementById('notesContent');
+        // Get the current height value, or use offsetHeight if not set
+        const currentHeight = content.style.height;
+        resizeStartHeight = currentHeight ? parseInt(currentHeight) : content.offsetHeight;
+        sidebar.classList.add('resizing');
+        content.classList.add('resizing');
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    
+    // Corner resize (both directions)
+    cornerHandle.addEventListener('mousedown', function(e) {
+        isResizingNotes = true;
+        resizeDirection = 'corner';
+        resizeStartX = e.clientX;
+        resizeStartY = e.clientY;
+        resizeStartWidth = sidebar.offsetWidth;
+        const content = document.getElementById('notesContent');
+        // Get the current height value, or use offsetHeight if not set
+        const currentHeight = content.style.height;
+        resizeStartHeight = currentHeight ? parseInt(currentHeight) : content.offsetHeight;
+        sidebar.classList.add('resizing');
+        content.classList.add('resizing');
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (isResizingNotes) {
+            const sidebar = document.getElementById('notesSidebar');
+            const content = document.getElementById('notesContent');
+            
+            if (resizeDirection === 'right' || resizeDirection === 'corner') {
+                const deltaX = e.clientX - resizeStartX;
+                const newWidth = Math.max(280, Math.min(1200, resizeStartWidth + deltaX));
+                sidebar.style.width = newWidth + 'px';
+            }
+            
+            if (resizeDirection === 'bottom' || resizeDirection === 'corner') {
+                const deltaY = e.clientY - resizeStartY;
+                const newHeight = Math.max(150, Math.min(window.innerHeight - 100, resizeStartHeight + deltaY));
+                content.style.height = newHeight + 'px';
+            }
+        }
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isResizingNotes) {
+            isResizingNotes = false;
+            resizeDirection = '';
+            
+            // Remove resizing class
+            const sidebar = document.getElementById('notesSidebar');
+            const content = document.getElementById('notesContent');
+            sidebar.classList.remove('resizing');
+            content.classList.remove('resizing');
+            
+            // Save size
+            localStorage.setItem('notesSize', JSON.stringify({
+                width: sidebar.offsetWidth,
+                height: content.offsetHeight
+            }));
+        }
+    });
+}
+
+function loadNotesSavedSize() {
+    const savedSize = localStorage.getItem('notesSize');
+    if (savedSize) {
+        const { width, height } = JSON.parse(savedSize);
+        const sidebar = document.getElementById('notesSidebar');
+        const content = document.getElementById('notesContent');
+        sidebar.style.width = width + 'px';
+        content.style.height = height + 'px';
     }
 }
 
@@ -621,9 +1734,9 @@ function updateTotalTime() {
     const totalOutboundWithCurrent = totalLoggedOutbound + currentOutbound;
     const totalDailyTime = totalInboundWithCurrent + totalOutboundWithCurrent;
     
-    document.getElementById('inboundTotal').textContent = `Inbound: ${totalInboundWithCurrent} min`;
-    document.getElementById('outboundTotal').textContent = `Outbound: ${totalOutboundWithCurrent} min`;
-    document.getElementById('grandTotal').textContent = `Total Today: ${totalDailyTime} minutes`;
+    document.getElementById('inboundTotal').textContent = `${totalInboundWithCurrent} min`;
+    document.getElementById('outboundTotal').textContent = `${totalOutboundWithCurrent} min`;
+    document.getElementById('grandTotal').textContent = `${totalDailyTime} minutes`;
     
     return { inbound: currentInbound, outbound: currentOutbound, total: currentInbound + currentOutbound };
 }
@@ -632,11 +1745,43 @@ function updateTotalTime() {
 
 function logCall() {
     const mainCategoryKey = document.getElementById('mainCategory').value;
-    const subCategoryKey = document.getElementById('subCategory').value;
+    const subcategoryName = getSubcategoryValue();
     
-    if (!mainCategoryKey || !subCategoryKey) {
-        alert('Error: Please select both main category and subcategory!');
+    // Pause stopwatch if running (don't log the time)
+    if (stopwatchRunning) {
+        pauseStopwatch();
+    }
+    
+    if (!mainCategoryKey) {
+        alert('Error: Please select a main category!');
         return;
+    }
+    
+    if (!subcategoryName) {
+        alert('Error: Please enter or select a subcategory!');
+        return;
+    }
+    
+    // Check if subcategory exists or needs to be created
+    let subCategoryKey = getSubcategoryKeyFromName(mainCategoryKey, subcategoryName);
+    
+    if (!subCategoryKey) {
+        // Create new subcategory
+        subCategoryKey = generateKey(subcategoryName);
+        
+        if (categories[mainCategoryKey].subcategories[subCategoryKey]) {
+            alert('A subcategory with this name already exists!');
+            return;
+        }
+        
+        // Add the new subcategory
+        categories[mainCategoryKey].subcategories[subCategoryKey] = {
+            name: subcategoryName,
+            template: ''
+        };
+        saveCategories();
+        updateSubcategoryDropdown();
+        showNotification(`New subcategory "${subcategoryName}" added!`);
     }
     
     const timeData = updateTotalTime();
@@ -701,7 +1846,7 @@ function logCall() {
     
     // Clear all fields
     const fieldsToClear = ['firstName', 'lastName', 'phoneNumber', 'email', 'bpn', 
-                           'ytunnus', 'contact2Name', 'contact2Phone', 'contact2Email',
+                           'ytunnus', 'companyName', 'contact2Name', 'contact2Phone', 'contact2Email',
                            'ticketNumber1', 'ticketNumber2', 'id1', 'id2'];
     fieldsToClear.forEach(id => document.getElementById(id).value = '');
     
@@ -717,8 +1862,11 @@ function logCall() {
     document.getElementById('mainCategory').value = lastLoggedMainCategory;
     document.getElementById('mainCategory').dispatchEvent(new Event('change'));
     setTimeout(() => {
-        document.getElementById('subCategory').value = lastLoggedSubCategory;
-        document.getElementById('subCategory').dispatchEvent(new Event('change'));
+        const subInput = document.getElementById('subCategoryInput');
+        if (subInput && lastLoggedSubCategory && categories[lastLoggedMainCategory]?.subcategories[lastLoggedSubCategory]) {
+            subInput.value = categories[lastLoggedMainCategory].subcategories[lastLoggedSubCategory].name;
+            generateTemplate();
+        }
     }, 50);
 }
 
@@ -825,10 +1973,11 @@ function copyField(fieldId) {
 
 function generateTemplate() {
     const mainCategoryKey = document.getElementById('mainCategory').value;
-    const subCategoryKey = document.getElementById('subCategory').value;
+    const subcategoryName = getSubcategoryValue();
+    const subCategoryKey = subcategoryName ? getSubcategoryKeyFromName(mainCategoryKey, subcategoryName) : null;
     
     const fields = ['firstName', 'lastName', 'phoneNumber', 'email', 'bpn',
-                   'ytunnus', 'contact2Name', 'contact2Phone', 'contact2Email',
+                   'ytunnus', 'companyName', 'contact2Name', 'contact2Phone', 'contact2Email',
                    'ticketNumber1', 'ticketNumber2', 'id1', 'id2'];
     const values = {};
     fields.forEach(id => values[id] = document.getElementById(id).value);
@@ -836,7 +1985,7 @@ function generateTemplate() {
     const timeData = updateTotalTime();
     const outputDiv = document.getElementById('output');
     
-    if (!mainCategoryKey && !subCategoryKey && !values.firstName && !values.lastName && 
+    if (!mainCategoryKey && !subcategoryName && !values.firstName && !values.lastName && 
         !values.phoneNumber && !values.email && !values.bpn) {
         outputDiv.innerHTML = `
             <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
@@ -865,16 +2014,15 @@ function generateTemplate() {
     });
     
     if (mainCategoryKey === 'kayttotuki') {
-        ['ytunnus', 'contact2Name', 'contact2Phone', 'contact2Email', 
+        ['ytunnus', 'companyName', 'contact2Name', 'contact2Phone', 'contact2Email', 
          'ticketNumber1', 'ticketNumber2', 'id1', 'id2'].forEach(key => {
             if (values[key]) summary += `${values[key]}\n`;
         });
     }
     
-    if (mainCategoryKey && subCategoryKey) {
+    if (mainCategoryKey && subcategoryName) {
         const mainCatText = document.getElementById('mainCategory').options[document.getElementById('mainCategory').selectedIndex].text;
-        const subCatText = document.getElementById('subCategory').options[document.getElementById('subCategory').selectedIndex].text;
-        summary += `${mainCatText} - ${subCatText}\n`;
+        summary += `${mainCatText} - ${subcategoryName}\n`;
     }
     
     if (timeData.inbound > 0) summary += `Inbound: ${timeData.inbound} min\n`;
@@ -1125,11 +2273,16 @@ function deleteMainCategory(mainKey) {
 // Setup field event listeners
 function setupEventListeners() {
     const fieldIds = ['firstName', 'lastName', 'phoneNumber', 'email', 'bpn',
-                     'ytunnus', 'contact2Name', 'contact2Phone', 'contact2Email',
+                     'ytunnus', 'companyName', 'contact2Name', 'contact2Phone', 'contact2Email',
                      'ticketNumber1', 'ticketNumber2', 'id1', 'id2'];
     
     document.getElementById('mainCategory').addEventListener('change', updateSubcategoryDropdown);
-    document.getElementById('subCategory').addEventListener('change', generateTemplate);
+    
+    // Subcategory input now uses oninput in HTML, but add backup listener
+    const subInput = document.getElementById('subCategoryInput');
+    if (subInput) {
+        subInput.addEventListener('input', handleSubcategoryInput);
+    }
     
     fieldIds.forEach(id => {
         document.getElementById(id).addEventListener('input', generateTemplate);
@@ -1138,9 +2291,17 @@ function setupEventListeners() {
 
 // Close modal when clicking outside
 window.onclick = function(event) {
+    // Close modals
     if (event.target.classList.contains('modal')) {
         if (event.target.id === 'categoryModal') closeCategoryManager();
         if (event.target.id === 'customerFieldsModal') closeCustomerFieldsManager();
+    }
+    
+    // Close subcategory dropdown when clicking outside
+    const dropdown = document.getElementById('subCategoryDropdown');
+    const comboBox = document.querySelector('.combo-box-wrapper');
+    if (dropdown && !comboBox?.contains(event.target)) {
+        hideSubcategoryDropdown();
     }
 };
 
@@ -1149,6 +2310,13 @@ window.onclick = function(event) {
 window.onload = function() {
     loadDarkModePreference();
     loadCustomerSectionState();
+    loadStopwatchSectionState();
+    loadSchedule();
+    loadScheduleSidebarState();
+    initScheduleDragging();
+    loadNotesSidebarState();
+    initNotesDragging();
+    initNotesResizing();
     initCategories();
     loadCustomFields();
     addTimeEntry('inbound');
@@ -1162,8 +2330,11 @@ window.onload = function() {
         document.getElementById('mainCategory').dispatchEvent(new Event('change'));
         setTimeout(() => {
             if (lastLoggedSubCategory && categories[lastLoggedMainCategory].subcategories[lastLoggedSubCategory]) {
-                document.getElementById('subCategory').value = lastLoggedSubCategory;
-                document.getElementById('subCategory').dispatchEvent(new Event('change'));
+                const subInput = document.getElementById('subCategoryInput');
+                if (subInput) {
+                    subInput.value = categories[lastLoggedMainCategory].subcategories[lastLoggedSubCategory].name;
+                    generateTemplate();
+                }
             }
         }, 50);
     }

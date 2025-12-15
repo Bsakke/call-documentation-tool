@@ -1,3 +1,81 @@
+/* Floating Personal Notes Styles */
+.floating-note {
+    position: fixed;
+    min-width: 260px;
+    max-width: 420px;
+    min-height: 120px;
+    max-height: 600px;
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.floating-note.dragging {
+    box-shadow: 0 8px 32px rgba(72,187,120,0.18);
+    transition: none;
+}
+.floating-note-header {
+    background: #48bb78;
+    color: white;
+    padding: 8px 12px;
+    font-weight: 600;
+    cursor: move;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.floating-note-delete {
+    background: #f56565;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.floating-note-delete:hover {
+    opacity: 1;
+}
+.floating-note-content {
+    flex: 1;
+    padding: 10px;
+    background: var(--section-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    resize: none;
+    border: none;
+    width: 100%;
+    min-height: 60px;
+    font-size: 15px;
+    outline: none;
+}
+.floating-note-resize {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 18px;
+    height: 18px;
+    cursor: nwse-resize;
+    background: transparent;
+    z-index: 2;
+}
+.floating-note-resize:after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg width="18" height="18" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="15" x2="15" y2="3" stroke="%2348bb78" stroke-width="2"/></svg>') no-repeat center center;
+    opacity: 0.7;
+}
 /* Deck 2.0 - Main Styles */
 
 * {
@@ -104,6 +182,288 @@ header p {
     grid-template-columns: 1fr 1fr;
     gap: 0;
     min-height: 600px;
+    position: relative;
+}
+
+.schedule-sidebar {
+    position: fixed;
+    width: 280px;
+    z-index: 1000;
+}
+
+.schedule-sidebar.dragging {
+    transition: none !important;
+}
+
+.schedule-content {
+    max-height: calc(100vh - 100px);
+    padding: 30px 20px;
+    background: var(--section-bg);
+    border: 2px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+}
+
+.schedule-sidebar.hidden .schedule-content {
+    max-height: 0;
+    padding: 0 20px;
+    opacity: 0;
+    overflow: hidden;
+    border: none;
+}
+
+.schedule-toggle-btn {
+    width: 100%;
+    height: 6px;
+    background: var(--button-bg);
+    border: none;
+    border-radius: 3px;
+    padding: 0;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.schedule-toggle-btn:hover {
+    background: var(--button-hover);
+    opacity: 1;
+}
+
+.schedule-handle {
+    background: var(--container-bg);
+    color: var(--button-bg);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.schedule-toggle-btn:hover .schedule-handle {
+    color: var(--button-hover);
+}
+
+/* Personal Notes Sidebar - Same structure as schedule */
+.notes-sidebar {
+    position: fixed;
+    width: 280px;
+    z-index: 1000;
+}
+
+.notes-sidebar.dragging {
+    transition: none !important;
+}
+
+.notes-sidebar.resizing,
+.notes-sidebar.resizing .notes-content {
+    transition: none !important;
+}
+
+.notes-content.resizing {
+    transition: none !important;
+}
+
+.notes-content {
+    height: auto;
+    padding: 30px 20px;
+    background: var(--section-bg);
+    border: 2px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    overflow-y: auto;
+    transition: height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.notes-content::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+}
+
+.notes-sidebar.hidden .notes-content {
+    height: 0 !important;
+    padding: 0 20px;
+    opacity: 0;
+    overflow: hidden;
+    border: none;
+}
+
+/* Individual Note Item Styles */
+.note-item {
+    background: var(--input-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    position: relative;
+    transition: border-color 0.2s ease;
+}
+
+.note-item:hover {
+    border-color: #48bb78;
+}
+
+.note-item textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--section-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    resize: vertical;
+    font-size: 14px;
+}
+
+.note-item textarea:focus {
+    outline: none;
+    border-color: #48bb78;
+}
+
+.note-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #f56565;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.note-delete-btn:hover {
+    opacity: 1;
+}
+
+#notesListContainer {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+#notesListContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#notesListContainer::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#notesListContainer::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+#notesListContainer::-webkit-scrollbar-thumb:hover {
+    background: #48bb78;
+}
+
+.notes-toggle-btn {
+    width: 100%;
+    height: 6px;
+    background: #48bb78;
+    border: none;
+    border-radius: 3px;
+    padding: 0;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.2s ease;
+    opacity: 0.8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.notes-toggle-btn:hover {
+    background: #38a169;
+    opacity: 1;
+}
+
+.notes-handle {
+    background: var(--container-bg);
+    color: #48bb78;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notes-toggle-btn:hover .notes-handle {
+    color: #38a169;
+}
+
+/* Resize handles for notes sidebar */
+.notes-content {
+    position: relative;
+}
+
+.resize-handle {
+    position: absolute;
+    z-index: 10;
+}
+
+.resize-handle-right {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+}
+
+.resize-handle-bottom {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.resize-handle-corner {
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    background: var(--border-color);
+    border-radius: 0 0 8px 0;
+    opacity: 0.5;
+}
+
+.resize-handle-corner:hover {
+    opacity: 1;
+}
+
+/* Personal notes textarea */
+#personalNotesArea {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+#personalNotesArea::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+}
+
+body.dark-mode .schedule-toggle-btn {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .left-panel, .right-panel {
@@ -115,6 +475,7 @@ header p {
 .left-panel {
     border-right: 2px solid var(--border-color);
     transition: border-color 0.3s ease;
+    position: relative;
 }
 
 .right-panel h2 {
@@ -164,7 +525,7 @@ label {
 
 .copy-field-btn {
     padding: 10px 16px;
-    background: #48bb78;
+    background: #38a169;
     color: white;
     border: none;
     border-radius: 6px;
@@ -178,6 +539,115 @@ label {
 
 .copy-field-btn:hover {
     background: #38a169;
+}
+
+/* Combo Box for Subcategory */
+.combo-box-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.combo-box-wrapper input[type="text"] {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.combo-box-wrapper input[type="text"]:focus {
+    border-color: var(--button-bg);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(128, 90, 213, 0.1);
+}
+
+.combo-box-wrapper input[type="text"]::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    height: calc(100% - 4px);
+    width: 38px;
+    background: var(--button-bg);
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 10px;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dropdown-arrow:hover {
+    background: #6b46c1;
+}
+
+.custom-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: var(--input-bg);
+    border: 2px solid var(--button-bg);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: -2px;
+}
+
+.custom-dropdown-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.custom-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.custom-dropdown-item:hover {
+    background: var(--section-bg);
+}
+
+.custom-dropdown-item.selected {
+    background: var(--button-bg);
+    color: white;
+    font-weight: 600;
+}
+
+.custom-dropdown-item.focused {
+    background: rgba(128, 90, 213, 0.2);
+    border-left: 3px solid var(--button-bg);
+    padding-left: 9px;
+}
+
+body.dark-mode .custom-dropdown-item.focused {
+    background: rgba(128, 90, 213, 0.3);
+}
+
+.custom-dropdown-empty {
+    padding: 15px 12px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+body.dark-mode .custom-dropdown {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 body.dark-mode .copy-field-btn {
@@ -284,6 +754,83 @@ body.dark-mode .quick-min-btn {
     opacity: 0.95;
 }
 
+/* Daily Totals Section */
+.daily-totals-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 3px solid var(--border-color);
+}
+
+.daily-totals-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.total-time-card {
+    background: var(--section-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.total-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.total-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.inbound-card {
+    border-left: 5px solid #38a169;
+}
+
+.inbound-card .total-value {
+    color: #38a169;
+}
+
+.outbound-card {
+    border-left: 5px solid #4299e1;
+}
+
+.outbound-card .total-value {
+    color: #4299e1;
+}
+
+.grand-total-card {
+    border-left: 5px solid var(--button-bg);
+    background: linear-gradient(135deg, var(--section-bg) 0%, var(--container-bg) 100%);
+    border: 3px solid var(--button-bg);
+}
+
+.grand-total-card .total-value {
+    color: var(--button-bg);
+    font-size: 26px;
+}
+
+.grand-total-card .total-label {
+    color: var(--button-bg);
+    font-size: 15px;
+}
+
+body.dark-mode .total-time-card {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Legacy time totals (kept for compatibility, hidden by default) */
 .time-totals {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -306,7 +853,7 @@ body.dark-mode .quick-min-btn {
 }
 
 .total-time.inbound {
-    background: #48bb78;
+    background: #38a169;
 }
 
 .total-time.outbound {
@@ -344,8 +891,18 @@ button:hover {
     background: var(--button-hover);
 }
 
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button:disabled:hover {
+    background: inherit;
+    transform: none;
+}
+
 .btn-secondary {
-    background: #48bb78;
+    background: #38a169;
 }
 
 .btn-secondary:hover {
@@ -360,7 +917,7 @@ button:hover {
 
 .log-call-btn {
     width: 100%;
-    background: #48bb78;
+    background: #38a169;
     margin-top: 15px;
 }
 
@@ -458,7 +1015,7 @@ body.dark-mode #undoButton {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: #48bb78;
+    background: #38a169;
     color: white;
     padding: 15px 25px;
     border-radius: 8px;
@@ -615,7 +1172,7 @@ body.dark-mode .modal {
 }
 
 .btn-save {
-    background: #48bb78;
+    background: #38a169;
     padding: 8px 12px;
     font-size: 12px;
 }
@@ -745,3 +1302,8 @@ small {
     font-size: 12px;
     transition: color 0.3s ease;
 }
+
+
+
+
+

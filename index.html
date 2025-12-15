@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Floating Personal Notes Container -->
+    <div id="floatingNotesContainer"></div>
+    <button id="addFloatingNoteBtn" onclick="addFloatingNote()" style="position: fixed; top: 20px; right: 20px; z-index: 2000; background: #48bb78; color: white; border: none; border-radius: 6px; padding: 10px 18px; font-size: 16px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.08); cursor: pointer;">+ Add Note</button>
     <div class="container">
         <header>
             <h1>Deck 2.0</h1>
@@ -14,6 +17,26 @@
         </header>
         
         <div class="main-content">
+            <!-- Weekly Schedule Sidebar -->
+            <div class="schedule-sidebar" id="scheduleSidebar">
+                <!-- Schedule Toggle Button (inside schedule) -->
+                <button class="schedule-toggle-btn" id="scheduleToggleBtn" onclick="toggleScheduleSidebar()" title="Toggle Weekly Schedule">
+                    <span class="schedule-handle" id="scheduleToggleIcon">▲</span>
+                </button>
+                
+                <div class="schedule-content" id="scheduleContent">
+                    <div class="section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h2 style="margin: 0;">Weekly Schedule</h2>
+                            <button onclick="openScheduleManager()" style="background: #805ad5; color: white; padding: 6px 10px; font-size: 12px;">Edit</button>
+                        </div>
+                        <div id="weeklyScheduleDisplay"></div>
+                    </div>
+                </div>
+            </div>
+            
+
+            
             <div class="left-panel">
                 <!-- Issue Category -->
                 <div class="section">
@@ -24,7 +47,17 @@
                     </div>
                     <div class="field-group">
                         <label for="subCategory">Subcategory:</label>
-                        <select id="subCategory" onchange="generateTemplate()"></select>
+                        <div class="combo-box-wrapper">
+                            <input type="text" 
+                                   id="subCategoryInput" 
+                                   placeholder="Select or type new subcategory..." 
+                                   oninput="handleSubcategoryInput()"
+                                   onfocus="showSubcategoryDropdown()"
+                                   onkeydown="handleSubcategoryKeydown(event)"
+                                   autocomplete="off">
+                            <button type="button" class="dropdown-arrow" onclick="toggleSubcategoryDropdown()" tabindex="-1">▼</button>
+                            <div id="subCategoryDropdown" class="custom-dropdown" style="display: none;"></div>
+                        </div>
                     </div>
                     <div class="button-group">
                         <button onclick="openCategoryManager()" style="width: 100%; background: #805ad5; color: white;">Manage Categories</button>
@@ -90,6 +123,14 @@
                             <div class="field-with-copy">
                                 <input type="text" id="ytunnus" placeholder="Enter Y-tunnus" oninput="generateTemplate()">
                                 <button class="copy-field-btn" tabindex="-1" onclick="copyField('ytunnus')">Copy</button>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            <label for="companyName">Company Name:</label>
+                            <div class="field-with-copy">
+                                <input type="text" id="companyName" placeholder="Enter company name" oninput="generateTemplate()">
+                                <button class="copy-field-btn" tabindex="-1" onclick="copyField('companyName')">Copy</button>
                             </div>
                         </div>
                         
@@ -160,6 +201,34 @@
                     </div>
                 </div>
                 
+                <!-- Time Tracking (Stopwatch) -->
+                <div class="section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; cursor: pointer;" onclick="toggleStopwatchSection()">
+                        <h2 style="margin: 0;"><span id="stopwatchSectionToggle">▶</span> Time Tracking</h2>
+                    </div>
+                    
+                    <div id="stopwatchSection" style="display: none;">
+                        <div class="field-group">
+                            <label for="stopwatchName">Task Name:</label>
+                            <input type="text" id="stopwatchName" placeholder="Unique timer name" style="width: 100%;">
+                        </div>
+                        
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div id="stopwatchDisplay" style="font-size: 48px; font-weight: bold; font-family: 'Courier New', monospace; color: var(--button-bg); margin-bottom: 15px;">00:00:00</div>
+                            <div style="display: flex; gap: 10px; justify-content: center;">
+                                <button id="stopwatchStartBtn" onclick="startStopwatch()" style="background: #48bb78; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">▶ Start</button>
+                                <button id="stopwatchPauseBtn" onclick="pauseStopwatch()" disabled style="background: #ed8936; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">⏸ Pause</button>
+                                <button id="stopwatchResetBtn" onclick="resetStopwatch()" style="background: #f56565; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">⏹ Reset</button>
+                            </div>
+                        </div>
+                        
+                        <div id="stopwatchHistory" style="margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--border-color);">
+                            <h3 style="margin-bottom: 10px; font-size: 14px; color: var(--text-secondary);">Recorded Sessions</h3>
+                            <div id="stopwatchHistoryList" style="font-size: 13px; color: var(--text-primary);"></div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Call Time Tracker -->
                 <div class="section">
                     <h2>Daily Call Time Tracker</h2>
@@ -188,16 +257,26 @@
                                 <div id="outboundEntries"></div>
                             </div>
                         </div>
-                        <div class="time-totals">
-                            <div class="total-time inbound" id="inboundTotal">Inbound: 0 min</div>
-                            <div class="total-time outbound" id="outboundTotal">Outbound: 0 min</div>
-                            <div class="total-time grand-total" id="grandTotal">Total Today: 0 minutes</div>
-                        </div>
                     </div>
-                    <button class="log-call-btn" onclick="logCall()" style="margin-top: 15px;">✓ Log This Call</button>
+                    <button class="log-call-btn" onclick="logCall()" style="margin-top: 20px;">✓ Log This Call</button>
                     <button id="undoButton" onclick="undoLastCall()" style="display: none; margin-top: 10px; width: 100%; background: #fc8181; color: white; border: none; border-radius: 6px; padding: 10px; font-size: 14px; font-weight: 600; cursor: pointer;">
                         ↩️ Undo Last Call (60s)
                     </button>
+                    <div class="daily-totals-section">
+                        <h3 style="margin-bottom: 15px; color: var(--text-primary);">Daily Totals</h3>
+                        <div class="total-time-card inbound-card">
+                            <div class="total-label">Inbound</div>
+                            <div class="total-value" id="inboundTotal">0 min</div>
+                        </div>
+                        <div class="total-time-card outbound-card">
+                            <div class="total-label">Outbound</div>
+                            <div class="total-value" id="outboundTotal">0 min</div>
+                        </div>
+                        <div class="total-time-card grand-total-card">
+                            <div class="total-label">Total Today</div>
+                            <div class="total-value" id="grandTotal">0 minutes</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -267,6 +346,26 @@
     
     <div class="copy-notification" id="copyNotification">
         ✓ Copied to clipboard!
+    </div>
+    
+    <!-- Weekly Schedule Manager Modal -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Weekly Schedule</h2>
+                <button class="close-btn" onclick="closeScheduleManager()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 15px;">Set your work schedule for each day. Leave blank for days off.</p>
+                </div>
+                <div id="scheduleEditList"></div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="saveSchedule()" style="background: #48bb78; color: white;">Save Schedule</button>
+                <button onclick="closeScheduleManager()" style="background: var(--text-secondary);">Cancel</button>
+            </div>
+        </div>
     </div>
     
     <!-- Customer Fields Manager Modal -->
@@ -348,3 +447,6 @@
     <script src="app.js"></script>
 </body>
 </html>
+
+
+
